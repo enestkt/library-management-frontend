@@ -1,0 +1,99 @@
+/* src/styles/layout.css */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Layout */
+.layout {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 220px;
+    background-color: #1e293b; /* koyu lacivert */
+    color: white;
+    padding: 20px;
+}
+
+.logo {
+    margin-bottom: 30px;
+    font-size: 22px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.menu a {
+    color: #cbd5f5;
+    text-decoration: none;
+    padding: 10px;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+.menu a:hover {
+    background-color: #334155;
+    color: white;
+}
+
+.menu a.active {
+    background-color: #2563eb;
+    color: white;
+}
+
+/* Main area */
+.main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #f1f5f9;
+}
+
+/* Navbar */
+.navbar {
+    height: 60px;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.title {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* Logout button */
+.logout-btn {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    background-color: #dc2626;
+}
+
+/* Content */
+.content {
+    padding: 20px;
+    overflow-y: auto;
+}
