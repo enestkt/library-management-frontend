@@ -18,22 +18,22 @@ function StatCard({ title, value, subtitle }) {
 export default function Dashboard() {
     const [loading, setLoading] = useState(true);
 
-    const [stats, setStats] = useState({
-        totalBooks: 0,
-        availableBooks: 0,
-        borrowedBooks: 0,
+    const [bookStats, setBookStats] = useState({
+        total: 0,
+        available: 0,
+        borrowed: 0,
     });
 
     const [loanStats, setLoanStats] = useState({
-        totalLoans: 0,
-        activeLoans: 0,
+        total: 0,
+        active: 0,
         recent: [],
     });
 
     useEffect(() => {
-        const run = async () => {
+        const loadDashboard = async () => {
             try {
-                /* ---- BOOK STATS ---- */
+                /* ---------- BOOK STATS ---------- */
                 const bookRes = await getAllBooks();
                 const books = bookRes.data || [];
 
@@ -41,13 +41,13 @@ export default function Dashboard() {
                 const availableBooks = books.filter(b => b.available).length;
                 const borrowedBooks = totalBooks - availableBooks;
 
-                setStats({
-                    totalBooks,
-                    availableBooks,
-                    borrowedBooks,
+                setBookStats({
+                    total: totalBooks,
+                    available: availableBooks,
+                    borrowed: borrowedBooks,
                 });
 
-                /* ---- LOAN STATS ---- */
+                /* ---------- LOAN STATS ---------- */
                 const loanRes = await getAllLoans();
                 const loans = loanRes.data || [];
 
@@ -57,8 +57,8 @@ export default function Dashboard() {
                     .slice(0, 5);
 
                 setLoanStats({
-                    totalLoans: loans.length,
-                    activeLoans: activeLoans.length,
+                    total: loans.length,
+                    active: activeLoans.length,
                     recent: recentLoans,
                 });
 
@@ -67,8 +67,16 @@ export default function Dashboard() {
             }
         };
 
-        run();
+        loadDashboard();
     }, []);
+
+    if (loading) {
+        return (
+            <div className="page">
+                <div className="card">Loading dashboard...</div>
+            </div>
+        );
+    }
 
     return (
         <div className="page">
@@ -77,88 +85,82 @@ export default function Dashboard() {
                 <p>Library overview (admin panel)</p>
             </div>
 
-            {loading ? (
-                <div className="card">Loading...</div>
-            ) : (
-                <>
-                    {/* --- BOOK STATS --- */}
-                    <div className="grid-3">
-                        <StatCard title="Total Books" value={stats.totalBooks} />
-                        <StatCard
-                            title="Available"
-                            value={stats.availableBooks}
-                            subtitle="Ready to borrow"
-                        />
-                        <StatCard
-                            title="Borrowed"
-                            value={stats.borrowedBooks}
-                            subtitle="Currently on loan"
-                        />
-                    </div>
+            {/* ---------- BOOK STATS ---------- */}
+            <div className="grid-3">
+                <StatCard title="Total Books" value={bookStats.total} />
+                <StatCard
+                    title="Available Books"
+                    value={bookStats.available}
+                    subtitle="Ready to borrow"
+                />
+                <StatCard
+                    title="Borrowed Books"
+                    value={bookStats.borrowed}
+                    subtitle="Currently on loan"
+                />
+            </div>
 
-                    {/* --- LOAN STATS --- */}
-                    <div className="grid-3" style={{ marginTop: 16 }}>
-                        <StatCard title="Total Loans" value={loanStats.totalLoans} />
-                        <StatCard
-                            title="Active Loans"
-                            value={loanStats.activeLoans}
-                            subtitle="Borrowed now"
-                        />
-                        <StatCard
-                            title="Returned"
-                            value={loanStats.totalLoans - loanStats.activeLoans}
-                        />
-                    </div>
+            {/* ---------- LOAN STATS ---------- */}
+            <div className="grid-3" style={{ marginTop: 16 }}>
+                <StatCard title="Total Loans" value={loanStats.total} />
+                <StatCard
+                    title="Active Loans"
+                    value={loanStats.active}
+                    subtitle="Borrowed now"
+                />
+                <StatCard
+                    title="Returned Loans"
+                    value={loanStats.total - loanStats.active}
+                />
+            </div>
 
-                    {/* --- RECENT LOANS --- */}
-                    <div className="card" style={{ marginTop: 16 }}>
-                        <h3 style={{ marginTop: 0 }}>Recent Loans</h3>
+            {/* ---------- RECENT LOANS ---------- */}
+            <div className="card" style={{ marginTop: 20 }}>
+                <h3 style={{ marginTop: 0 }}>Recent Loans</h3>
 
-                        <div className="table-wrap">
-                            <table className="table">
-                                <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Book</th>
-                                    <th>User</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {loanStats.recent.map(l => (
-                                    <tr key={l.id}>
-                                        <td>{l.id}</td>
-                                        <td>{l.book?.title || "-"}</td>
-                                        <td>{l.user?.email || "-"}</td>
-                                        <td>
-                                            <span
-                                                className={
-                                                    l.status === "BORROWED"
-                                                        ? "badge warn"
-                                                        : "badge ok"
-                                                }
-                                            >
-                                                {l.status}
-                                            </span>
-                                        </td>
-                                        <td>{l.loanDate}</td>
-                                    </tr>
-                                ))}
+                <div className="table-wrap">
+                    <table className="table">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Book</th>
+                            <th>User</th>
+                            <th>Status</th>
+                            <th>Loan Date</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {loanStats.recent.map(l => (
+                            <tr key={l.id}>
+                                <td>{l.id}</td>
+                                <td>{l.book?.title || "-"}</td>
+                                <td>{l.user?.email || "-"}</td>
+                                <td>
+                                        <span
+                                            className={
+                                                l.status === "BORROWED"
+                                                    ? "badge warn"
+                                                    : "badge ok"
+                                            }
+                                        >
+                                            {l.status}
+                                        </span>
+                                </td>
+                                <td>{l.loanDate}</td>
+                            </tr>
+                        ))}
 
-                                {loanStats.recent.length === 0 && (
-                                    <tr>
-                                        <td colSpan="5" className="empty">
-                                            No loans yet.
-                                        </td>
-                                    </tr>
-                                )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </>
-            )}
+                        {loanStats.recent.length === 0 && (
+                            <tr>
+                                <td colSpan="5" className="empty">
+                                    No loans yet.
+                                </td>
+                            </tr>
+                        )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     );
 }
