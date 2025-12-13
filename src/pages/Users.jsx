@@ -21,7 +21,7 @@ export default function Users() {
     }, []);
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Delete this user?")) return;
+        if (!window.confirm("Bu kullanıcıyı silmek istediğinize emin misiniz?")) return;
         await deleteUser(id);
         loadUsers();
     };
@@ -29,53 +29,64 @@ export default function Users() {
     return (
         <div className="page">
             <div className="page-header">
-                <h1>Users</h1>
-                <p>Registered users</p>
+                <h1>Users Directory</h1>
+                <p>Manage registered members and admins</p>
             </div>
 
-            <div className="card">
+            <div className="card" style={{ padding: "0", overflow: "hidden" }}>
                 {loading ? (
-                    <div>Loading...</div>
+                    <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>Loading users...</div>
                 ) : (
                     <div className="table-wrap">
                         <table className="table">
                             <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
+                                <th style={{ width: "80px" }}>ID</th>
+                                <th>User Info</th>
+                                <th>Email Address</th>
                                 <th>Role</th>
-                                <th style={{ width: 120 }}>Actions</th>
+                                <th style={{ textAlign: "right" }}>Actions</th>
                             </tr>
                             </thead>
                             <tbody>
                             {users.map((u) => (
                                 <tr key={u.id}>
-                                    <td>{u.id}</td>
-                                    <td>{u.name || "-"}</td>
-                                    <td>{u.email}</td>
+                                    <td style={{ color: "#94a3b8" }}>#{u.id}</td>
                                     <td>
-                                            <span className="badge">
+                                        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                                            <div style={{
+                                                width: "32px", height: "32px", borderRadius: "50%", background: "#3b82f6", color: "white",
+                                                display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "600", fontSize: "14px"
+                                            }}>
+                                                {u.name ? u.name.charAt(0).toUpperCase() : "U"}
+                                            </div>
+                                            <span style={{ fontWeight: "500", color: "#0f172a" }}>{u.name || "No Name"}</span>
+                                        </div>
+                                    </td>
+                                    <td style={{ color: "#475569" }}>{u.email}</td>
+                                    <td>
+                                            <span style={{
+                                                padding: "4px 12px", borderRadius: "20px", fontSize: "12px", fontWeight: "600",
+                                                background: u.role === "ADMIN" ? "#ede9fe" : "#f1f5f9",
+                                                color: u.role === "ADMIN" ? "#7c3aed" : "#475569",
+                                                border: "1px solid transparent"
+                                            }}>
                                                 {u.role}
                                             </span>
                                     </td>
-                                    <td>
+                                    <td style={{ textAlign: "right" }}>
                                         <button
-                                            className="btn danger"
+                                            className="btn-danger"
                                             onClick={() => handleDelete(u.id)}
+                                            style={{ fontSize: "12px" }}
                                         >
-                                            Delete
+                                            Remove
                                         </button>
                                     </td>
                                 </tr>
                             ))}
-
                             {users.length === 0 && (
-                                <tr>
-                                    <td colSpan="5" className="empty">
-                                        No users found.
-                                    </td>
-                                </tr>
+                                <tr><td colSpan="5" style={{ padding: "40px", textAlign: "center" }}>No users found.</td></tr>
                             )}
                             </tbody>
                         </table>

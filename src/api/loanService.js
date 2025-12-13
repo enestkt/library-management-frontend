@@ -1,26 +1,32 @@
 import api from "./api";
 
-// Book borrow
+// KİTAP ÖDÜNÇ AL (Düzeltilen Kısım)
+// Backend @RequestBody istediği için veriyi {} içinde gönderiyoruz.
 export const borrowBook = (bookId, userId) => {
-    return api.post(`/api/loans/borrow/${bookId}/${userId}`);
+    return api.post("/loans/borrow", {
+        bookId: bookId,
+        userId: userId
+    });
 };
 
-// Book return
+// KİTAP İADE ET (Bu kısım zaten doğruydu, path variable kullanıyor)
 export const returnBook = (loanId) => {
-    return api.post(`/api/loans/return/${loanId}`);
+    return api.post(`/loans/return/${loanId}`);
 };
 
-// User loan history
+// KULLANICI GEÇMİŞİ
 export const getUserLoans = (userId) => {
-    return api.get(`/api/loans/user/${userId}`);
+    return api.get(`/loans/user/${userId}`);
 };
 
+// TÜM KULLANICILAR
 export const getAllUsers = () =>
-    api.get("/api/users");
+    api.get("/users");
 
+// TÜM KİTAPLAR
 export const getAllBooks = () =>
-    api.get("/api/books");
+    api.get("/books");
 
+// TÜM ÖDÜNÇLER
 export const getAllLoans = () =>
-    api.get("/api/loans");
-
+    api.get("/loans");

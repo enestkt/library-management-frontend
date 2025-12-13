@@ -1,88 +1,171 @@
-/* === PAGE LAYOUT === */
+/* === PAGE HEADER === */
 .page {
-    padding: 20px;
+    max-width: 1400px; /* Geniş ekranlarda daha yayvan dursun */
+    margin: 0 auto;
+    padding-bottom: 40px;
 }
 
 .page-header {
-    margin-bottom: 20px;
+    margin-bottom: 32px;
 }
 
 .page-header h1 {
-    margin: 0;
-    font-size: 24px;
-    font-weight: 600;
+    font-size: 32px;
+    font-weight: 800;
     color: #0f172a;
+    letter-spacing: -0.03em;
+    margin: 0 0 8px 0;
 }
 
 .page-header p {
-    margin: 4px 0 0;
-    color: #6b7280;
-    font-size: 14px;
+    color: #64748b;
+    font-size: 16px;
+    margin: 0;
 }
 
-/* === GRID === */
+/* === GRID SİSTEMİ === */
 .grid-3 {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
 }
 
-/* === CARD === */
-.card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-}
-
-/* === STAT CARD (POLISHED) === */
+/* === STAT KARTLARI (ANA TASARIM) === */
 .stat-card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    border-left: 5px solid #2563eb;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    justify-content: space-between;
+    height: 160px; /* Sabit yükseklik vererek hizalı durmasını sağla */
 }
 
+/* Kartların üzerine gelince yukarı kalkması */
 .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    transform: translateY(-5px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+    border-color: transparent;
 }
 
+/* Sayı Değeri */
+.stat-value {
+    font-size: 48px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+    margin-top: auto; /* En alta it */
+    z-index: 2;
+}
+
+/* Başlık */
 .stat-title {
-    font-size: 13px;
-    color: #64748b;
+    font-size: 14px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.stat-value {
-    font-size: 32px;
-    font-weight: 700;
-    color: #0f172a;
-}
-
+/* Alt Başlık (Subtitle) */
 .stat-sub {
-    font-size: 12px;
-    color: #9ca3af;
-}
-
-/* === BADGES (dashboard + tables uyumlu) === */
-.badge {
+    font-size: 13px;
+    font-weight: 500;
+    margin-top: 8px;
     padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
+    border-radius: 99px;
     display: inline-block;
+    width: fit-content;
+    z-index: 2;
 }
 
-.badge.ok {
-    background-color: #dcfce7;
-    color: #166534;
+/* === RENKLENDİRME VE İKONLAR (React kodu değiştirmeden) === */
+
+/* --- 1. KART (Total Books) - MAVİ --- */
+.grid-3 .stat-card:nth-of-type(1) {
+    background: linear-gradient(145deg, #ffffff 0%, #eff6ff 100%);
+    border-left: 4px solid #3b82f6;
+}
+.grid-3 .stat-card:nth-of-type(1) .stat-value { color: #1e40af; }
+.grid-3 .stat-card:nth-of-type(1) .stat-sub { color: #3b82f6; background: #dbeafe; }
+/* Arka plan dekoratif ikon (Emoji ile) */
+.grid-3 .stat-card:nth-of-type(1)::after {
+    content: '📚';
+    position: absolute;
+    right: -10px;
+    top: -10px;
+    font-size: 120px;
+    opacity: 0.1;
+    transform: rotate(15deg);
+    z-index: 1;
 }
 
-.badge.warn {
-    background-color: #fee2e2;
-    color: #991b1b;
+/* --- 2. KART (Available) - YEŞİL --- */
+.grid-3 .stat-card:nth-of-type(2) {
+    background: linear-gradient(145deg, #ffffff 0%, #f0fdf4 100%);
+    border-left: 4px solid #22c55e;
+}
+.grid-3 .stat-card:nth-of-type(2) .stat-value { color: #166534; }
+.grid-3 .stat-card:nth-of-type(2) .stat-sub { color: #15803d; background: #dcfce7; }
+.grid-3 .stat-card:nth-of-type(2)::after {
+    content: '✅';
+    position: absolute;
+    right: 0px;
+    top: 10px;
+    font-size: 100px;
+    opacity: 0.1;
+    z-index: 1;
+    filter: grayscale(100%); /* Siyah beyaz yapıp silikleştirir */
+}
+
+/* --- 3. KART (Borrowed) - TURUNCU/KIRMIZI --- */
+.grid-3 .stat-card:nth-of-type(3) {
+    background: linear-gradient(145deg, #ffffff 0%, #fff7ed 100%);
+    border-left: 4px solid #f97316;
+}
+.grid-3 .stat-card:nth-of-type(3) .stat-value { color: #9a3412; }
+.grid-3 .stat-card:nth-of-type(3) .stat-sub { color: #c2410c; background: #ffedd5; }
+.grid-3 .stat-card:nth-of-type(3)::after {
+    content: '⏳';
+    position: absolute;
+    right: -10px;
+    bottom: -20px;
+    font-size: 110px;
+    opacity: 0.15;
+    z-index: 1;
+}
+
+/* --- İkinci Satırdaki Kartlar İçin Genel Stil (Users / Loans) --- */
+.grid-3:nth-of-type(2) .stat-card {
+    border-left: 4px solid #8b5cf6; /* Mor */
+    background: linear-gradient(145deg, #ffffff 0%, #f5f3ff 100%);
+}
+.grid-3:nth-of-type(2) .stat-card .stat-value { color: #5b21b6; }
+
+
+/* === RECENT LOANS TABLE CARD (Alt Tablo Kısmı) === */
+.card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.03), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+    border: 1px solid #f1f5f9;
+}
+
+.card h3 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 18px;
+    color: #334155;
+    font-weight: 700;
 }

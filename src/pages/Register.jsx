@@ -17,10 +17,15 @@ function Register() {
 
         try {
             const res = await registerRequest(name, email, password);
-            localStorage.setItem("token", res.data.token);
-            navigate("/dashboard");
+            // Kayıt sonrası otomatik login yapıp token'ı kaydediyoruz
+            if(res.data.token) {
+                localStorage.setItem("token", res.data.token);
+                navigate("/dashboard");
+            } else {
+                navigate("/login");
+            }
         } catch (err) {
-            setError("Kayıt başarısız. Bilgileri kontrol edin.");
+            setError("Kayıt işlemi başarısız. Lütfen bilgileri kontrol edin.");
         }
     };
 
@@ -28,6 +33,9 @@ function Register() {
         <div className="auth-page">
             <form className="auth-card" onSubmit={handleRegister}>
                 <h2>Create Account</h2>
+                <p style={{ textAlign: "center", color: "#6b7280", marginBottom: "24px", fontSize: "14px" }}>
+                    Join library management system
+                </p>
 
                 {error && <div className="auth-error">{error}</div>}
 
@@ -35,6 +43,7 @@ function Register() {
                     <label>Full Name</label>
                     <input
                         type="text"
+                        placeholder="John Doe"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         required
@@ -42,9 +51,10 @@ function Register() {
                 </div>
 
                 <div className="auth-field">
-                    <label>Email</label>
+                    <label>Email Address</label>
                     <input
                         type="email"
+                        placeholder="john@example.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
@@ -55,6 +65,7 @@ function Register() {
                     <label>Password</label>
                     <input
                         type="password"
+                        placeholder="••••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
@@ -62,12 +73,12 @@ function Register() {
                 </div>
 
                 <button className="auth-btn" type="submit">
-                    Register
+                    Sign Up
                 </button>
 
-                <p className="auth-link">
-                    Hesabın var mı? <Link to="/login">Login</Link>
-                </p>
+                <div className="auth-link">
+                    Already have an account? <Link to="/login">Sign In</Link>
+                </div>
             </form>
         </div>
     );

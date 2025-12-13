@@ -24,13 +24,14 @@ export default function Books() {
     }, []);
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Delete this book?")) return;
+        if (!window.confirm("Bu kitabı silmek istediğinize emin misiniz?")) return;
         try {
             await deleteBook(id);
-            setMsg("✅ Book deleted successfully");
+            setMsg("✅ Kitap başarıyla silindi");
             load();
+            setTimeout(() => setMsg(""), 3000); // 3 saniye sonra mesajı sil
         } catch {
-            setMsg("❌ Delete failed");
+            setMsg("❌ Silme işlemi başarısız oldu");
         }
     };
 
@@ -42,66 +43,95 @@ export default function Books() {
 
     return (
         <div className="page">
-            <div className="page-header row-between">
+            {/* HEADER & SEARCH */}
+            <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "end" }}>
                 <div>
-                    <h1>Books</h1>
-                    <p>All books in database</p>
+                    <h1>Books Management</h1>
+                    <p>View and manage library inventory</p>
                 </div>
 
-                <input
-                    className="input"
-                    placeholder="Search title / isbn..."
-                    value={q}
-                    onChange={(e) => setQ(e.target.value)}
-                    style={{ width: 260 }}
-                />
+                <div style={{ position: "relative" }}>
+                    <input
+                        className="input"
+                        placeholder="🔍 Search title or ISBN..."
+                        value={q}
+                        onChange={(e) => setQ(e.target.value)}
+                        style={{
+                            width: "300px",
+                            padding: "12px 16px",
+                            borderRadius: "10px",
+                            border: "1px solid #cbd5e1",
+                            boxShadow: "0 2px 5px rgba(0,0,0,0.05)"
+                        }}
+                    />
+                </div>
             </div>
 
-            {msg && <div className="card info">{msg}</div>}
+            {/* NOTIFICATION */}
+            {msg && (
+                <div style={{
+                    marginBottom: "20px", padding: "12px", borderRadius: "8px",
+                    background: msg.includes("✅") ? "#dcfce7" : "#fee2e2",
+                    color: msg.includes("✅") ? "#166534" : "#991b1b",
+                    fontWeight: "500"
+                }}>
+                    {msg}
+                </div>
+            )}
 
-            <div className="card">
+            {/* TABLE CARD */}
+            <div className="card" style={{ padding: "0", overflow: "hidden" }}>
                 {loading ? (
-                    <div>Loading...</div>
+                    <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>Loading books data...</div>
                 ) : (
                     <div className="table-wrap">
                         <table className="table">
                             <thead>
                             <tr>
-                                <th>ID</th>
+                                <th style={{ width: "80px" }}>ID</th>
+                                <th>Image</th>
+                                <th>Book Details</th>
                                 <th>ISBN</th>
-                                <th>Title</th>
-                                <th>Available</th>
-                                <th style={{ width: 120 }}>Actions</th>
+                                <th>Status</th>
+                                <th style={{ textAlign: "right" }}>Actions</th>
                             </tr>
                             </thead>
                             <tbody>
-                            {filtered.map((b) => (
-                                <tr key={b.id}>
-                                    <td>{b.id}</td>
-                                    <td>{b.isbn}</td>
-                                    <td className="td-title">{b.title}</td>
-                                    <td>
-                                            <span className={`badge ${b.available ? "green" : "red"}`}>
-                                                {b.available ? "YES" : "NO"}
-                                            </span>
-                                    </td>
-                                    <td>
-                                        <button
-                                            className="btn-danger"
-                                            onClick={() => handleDelete(b.id)}
-                                        >
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-
-                            {filtered.length === 0 && (
-                                <tr>
-                                    <td colSpan="5" className="empty">
-                                        No books found.
-                                    </td>
-                                </tr>
+                            {filtered.length === 0 ? (
+                                <tr><td colSpan="6" style={{ padding: "40px", textAlign: "center", color: "#94a3b8" }}>No books found matching your search.</td></tr>
+                            ) : (
+                                filtered.map((b) => (
+                                    <tr key={b.id}>
+                                        <td style={{ color: "#94a3b8", fontWeight: "500" }}>#{b.id}</td>
+                                        <td>
+                                            <div style={{
+                                                width: "40px", height: "60px", background: "#f1f5f9", borderRadius: "4px",
+                                                display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden"
+                                            }}>
+                                                {b.imageUrl ? <img src={b.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : "📖"}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div style={{ fontWeight: "600", color: "#0f172a", fontSize: "15px" }}>{b.title}</div>
+                                            <div style={{ fontSize: "13px", color: "#64748b" }}>{b.authorName || "Unknown Author"}</div>
+                                        </td>
+                                        <td style={{ fontFamily: "monospace", color: "#475569" }}>{b.isbn}</td>
+                                        <td>
+                                                <span className={`badge ${b.available ? "green" : "red"}`}>
+                                                    {b.available ? "Available" : "Borrowed"}
+                                                </span>
+                                        </td>
+                                        <td style={{ textAlign: "right" }}>
+                                            <button
+                                                className="btn-danger"
+                                                onClick={() => handleDelete(b.id)}
+                                                style={{ fontSize: "12px", padding: "6px 12px" }}
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
                             )}
                             </tbody>
                         </table>

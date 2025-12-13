@@ -1,5 +1,27 @@
+/* Google Fonts - Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 body {
     margin: 0;
-    background-color: #f1f5f9;
-    font-family: Arial, Helvetica, sans-serif;
+    padding: 0;
+    background-color: #f3f4f6; /* Daha yumuşak gri */
+    font-family: 'Inter', sans-serif; /* Modern font */
+    color: #1f2937; /* Tam siyah değil, koyu gri (göz yormaz) */
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar Güzelleştirme */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
