@@ -1,114 +1,151 @@
+/* ============================= */
+/* GLOBAL RESET & FONT           */
+/* ============================= */
+
 * {
     box-sizing: border-box;
 }
 
-.layout {
-    display: flex;
-    height: 100vh;
-    overflow: hidden; /* Sayfa taşmasını engelle */
+body {
+    margin: 0;
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #f8fafc;
+    color: #1e293b;
+    line-height: 1.6;
 }
 
-/* === SIDEBAR === */
-.sidebar {
-    width: 260px; /* Biraz daha geniş */
-    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); /* Hafif gradient */
-    color: #e2e8f0;
-    display: flex;
-    flex-direction: column;
-    padding: 24px;
-    box-shadow: 4px 0 24px rgba(0,0,0,0.1);
-    z-index: 10;
+/* ============================= */
+/* PAGE LAYOUT                   */
+/* ============================= */
+
+.page {
+    padding: 32px;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-.logo {
-    font-size: 20px;
+.page-header {
+    margin-bottom: 32px;
+}
+
+.page-header h1 {
+    font-size: 28px;
     font-weight: 700;
-    color: #ffffff;
-    margin-bottom: 40px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin: 0 0 6px 0;
 }
 
-.menu {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.menu a {
-    color: #94a3b8;
-    text-decoration: none;
-    padding: 12px 16px;
-    border-radius: 8px;
+.page-header p {
     font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
+    color: #64748b;
+    margin: 0;
 }
 
-.menu a:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #ffffff;
-    transform: translateX(4px); /* Hoverda hafif sağa kayma */
-}
+/* ============================= */
+/* CARD SYSTEM                   */
+/* ============================= */
 
-.menu a.active {
-    background-color: #3b82f6; /* Modern mavi */
-    color: white;
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); /* Glow efekti */
-}
-
-/* === MAIN CONTENT === */
-.main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background-color: #f3f4f6;
-    overflow: hidden;
-}
-
-/* === NAVBAR === */
-.navbar {
-    height: 70px;
+.card {
     background-color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 32px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.03); /* Çok hafif gölge */
-    z-index: 5;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
 }
 
-.title {
-    font-size: 16px;
+.card h3 {
+    margin: 0 0 12px 0;
+    font-size: 18px;
     font-weight: 600;
-    color: #334155;
 }
 
-.logout-btn {
-    background-color: #fee2e2;
-    color: #dc2626;
+/* ============================= */
+/* GRID HELPERS                  */
+/* ============================= */
+
+.grid-3 {
+    display: grid;
+    gap: 24px;
+}
+
+/* ============================= */
+/* BUTTONS                       */
+/* ============================= */
+
+.btn-primary {
+    background-color: #3b82f6;
+    color: #ffffff;
     border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 14px;
     font-weight: 600;
-    font-size: 13px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
-.logout-btn:hover {
-    background-color: #fecaca;
+.btn-primary:hover {
+    background-color: #2563eb;
     transform: translateY(-1px);
 }
 
-/* === CONTENT AREA === */
-.content {
-    padding: 32px;
-    overflow-y: auto;
-    height: 100%;
+.btn-dark {
+    background-color: #1e293b;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* ============================= */
+/* TABLES                        */
+/* ============================= */
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table thead {
+    background-color: #f1f5f9;
+}
+
+.table th {
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    padding: 14px;
+}
+
+.table td {
+    padding: 14px;
+    font-size: 14px;
+    border-top: 1px solid #e5e7eb;
+}
+
+/* ============================= */
+/* BADGES                        */
+/* ============================= */
+
+.badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge.ok {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.badge.warn {
+    background-color: #fee2e2;
+    color: #991b1b;
 }
