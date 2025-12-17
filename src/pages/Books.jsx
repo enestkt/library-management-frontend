@@ -1,192 +1,174 @@
 import { useEffect, useState } from "react";
-import { getAllBooks, deleteBook } from "../api/bookService";
-import { borrowBook } from "../api/loanService"; // Ödünç alma fonksiyonu
-import "../styles/pages.css";
-import "../styles/books.css";
+import { getBooks, deleteBook } from "../api/api"; // Merkezi API yapılandırması
+import axios from "axios";
+import "../styles/pages.css"; //
+import "../styles/books.css"; //
 
 export default function Books() {
-    const [loading, setLoading] = useState(true);
     const [books, setBooks] = useState([]);
-    const [q, setQ] = useState("");
-    const [msg, setMsg] = useState("");
+    const [showAddForm, setShowAddForm] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [searchTerm, setSearchTerm] = useState(""); // Arama özelliği için
 
-    // Giriş yapan kullanıcının bilgilerini al
-    const role = localStorage.getItem("role");
-    const currentUserId = localStorage.getItem("userId");
+    // Yeni kitap state'i (Admin ekleme formu için)
+    const [newBook, setNewBook] = useState({
+        title: "",
+        authorName: "",
+        categoryName: "",
+        isbn: "",
+        description: "",
+        imageUrl: ""
+    });
 
-    const load = async () => {
+    // Kitapları API'den çekme fonksiyonu
+    const fetchBooks = async () => {
         setLoading(true);
         try {
-            const res = await getAllBooks();
+            const res = await getBooks();
             setBooks(res.data || []);
+        } catch (err) {
+            console.error("Kitaplar yüklenirken hata oluştu:", err);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        load();
+        fetchBooks();
     }, []);
 
-    // ADMİN İÇİN SİLME
+    // Yeni Kitap Ekleme (POST) İşlemi
+    const handleAddBook = async (e) => {
+        e.preventDefault();
+        try {
+            const token = localStorage.getItem("token"); //
+            const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:8080/api";
+
+            await axios.post(`${apiUrl}/books`, newBook, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            alert("✅ Kitap başarıyla kütüphaneye eklendi!");
+            setShowAddForm(false);
+            setNewBook({ title: "", authorName: "", categoryName: "", isbn: "", description: "", imageUrl: "" });
+            fetchBooks(); // Listeyi yenile
+        } catch (err) {
+            alert("❌ Hata: " + (err.response?.data?.message || "Kitap eklenemedi. Yetkinizi kontrol edin."));
+        }
+    };
+
+    // Kitap Silme (DELETE) İşlemi
     const handleDelete = async (id) => {
-        if (!window.confirm("Bu kitabı silmek istediğinize emin misiniz?")) return;
-        try {
-            await deleteBook(id);
-            setMsg("✅ Kitap başarıyla silindi");
-            load();
-            setTimeout(() => setMsg(""), 3000);
-        } catch {
-            setMsg("❌ Silme işlemi başarısız oldu");
+        if (window.confirm("Bu kitabı silmek istediğinize emin misiniz?")) {
+            try {
+                await deleteBook(id);
+                fetchBooks(); // Listeyi yenile
+            } catch (err) {
+                alert("❌ Silme işlemi başarısız.");
+            }
         }
     };
 
-    // USER İÇİN ÖDÜNÇ ALMA
-    const handleBorrow = async (bookId) => {
-        if (!window.confirm("Bu kitabı ödünç almak istiyor musunuz?")) return;
-        try {
-            // Service'e Kitap ID ve Kullanıcı ID gönderiyoruz
-            await borrowBook(bookId, currentUserId);
-            setMsg("✅ Kitap başarıyla ödünç alındı! Keyifli okumalar.");
-            load(); // Listeyi yenile (Kitap artık müsait olmayacak)
-            setTimeout(() => setMsg(""), 3000);
-        } catch (error) {
-            setMsg("❌ Ödünç alma başarısız! (Kitap başkasında olabilir)");
-        }
-    };
-
-    const filtered = books.filter((b) => {
-        const t = (b.title || "").toLowerCase();
-        const i = (b.isbn || "").toLowerCase();
-        return t.includes(q.toLowerCase()) || i.includes(q.toLowerCase());
-    });
+    // Arama filtrelemesi (Hem yazar hem kitap ismine göre)
+    const filteredBooks = books.filter(book =>
+        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.authorName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <div className="page">
-            {/* HEADER & SEARCH */}
-            <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "end" }}>
+            <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}>
                 <div>
-                    <h1>Library Inventory</h1>
-                    <p>Browse and borrow books from our collection</p>
+                    <h1>Kitap Envanteri</h1>
+                    <p>Kütüphanedeki tüm kitapları yönetin ve yeni kayıt oluşturun.</p>
                 </div>
-
-                <div style={{ position: "relative" }}>
+                <div style={{ display: "flex", gap: "10px" }}>
+                    {/* Arama Çubuğu */}
                     <input
-                        className="input"
-                        placeholder="🔍 Search title or ISBN..."
-                        value={q}
-                        onChange={(e) => setQ(e.target.value)}
-                        style={{
-                            width: "300px",
-                            padding: "12px 16px",
-                            borderRadius: "10px",
-                            border: "1px solid #cbd5e1",
-                            boxShadow: "0 2px 5px rgba(0,0,0,0.05)"
-                        }}
+                        type="text"
+                        placeholder="Kitap veya yazar ara..."
+                        className="form-input"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ padding: "10px", borderRadius: "8px", border: "1px solid #ddd", width: "220px" }}
                     />
+                    <button
+                        onClick={() => setShowAddForm(!showAddForm)}
+                        className={showAddForm ? "btn-dark" : "btn-primary"}
+                        style={{ padding: "10px 20px", borderRadius: "8px", cursor: "pointer", border: "none" }}
+                    >
+                        {showAddForm ? "✖ İptal Et" : "+ Yeni Kitap Ekle"}
+                    </button>
                 </div>
             </div>
 
-            {/* NOTIFICATION */}
-            {msg && (
-                <div style={{
-                    marginBottom: "20px", padding: "12px", borderRadius: "8px",
-                    background: msg.includes("✅") ? "#dcfce7" : "#fee2e2",
-                    color: msg.includes("✅") ? "#166534" : "#991b1b",
-                    fontWeight: "600"
-                }}>
-                    {msg}
+            {/* --- YENİ KİTAP EKLEME FORMU --- */}
+            {showAddForm && (
+                <div className="card" style={{ marginBottom: "30px", border: "2px solid #3b82f6", padding: "20px" }}>
+                    <h3 style={{ marginBottom: "20px" }}>📖 Yeni Kitap Kaydı</h3>
+                    <form onSubmit={handleAddBook} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "15px" }}>
+                        <input
+                            type="text" required placeholder="Kitap Adı" className="form-input"
+                            value={newBook.title} onChange={e => setNewBook({...newBook, title: e.target.value})}
+                        />
+                        <input
+                            type="text" required placeholder="Yazar" className="form-input"
+                            value={newBook.authorName} onChange={e => setNewBook({...newBook, authorName: e.target.value})}
+                        />
+                        <input
+                            type="text" required placeholder="Kategori" className="form-input"
+                            value={newBook.categoryName} onChange={e => setNewBook({...newBook, categoryName: e.target.value})}
+                        />
+                        <input
+                            type="text" placeholder="Görsel URL (Opsiyonel)" className="form-input"
+                            value={newBook.imageUrl} onChange={e => setNewBook({...newBook, imageUrl: e.target.value})}
+                        />
+                        <textarea
+                            placeholder="Kitap Açıklaması" rows="2" className="form-input" style={{ gridColumn: "span 2" }}
+                            value={newBook.description} onChange={e => setNewBook({...newBook, description: e.target.value})}
+                        ></textarea>
+                        <button type="submit" className="btn-primary" style={{ gridColumn: "span 2", padding: "12px", fontWeight: "bold" }}>
+                            Sisteme Kaydet
+                        </button>
+                    </form>
                 </div>
             )}
 
-            {/* TABLE */}
-            <div className="card" style={{ padding: "0", overflow: "hidden" }}>
-                {loading ? (
-                    <div style={{ padding: "40px", textAlign: "center", color: "#64748b" }}>Loading books...</div>
-                ) : (
-                    <div className="table-wrap">
-                        <table className="table">
-                            <thead>
-                            <tr>
-                                <th style={{ width: "80px" }}>Img</th>
-                                <th>Book Details</th>
-                                <th>Status</th>
-                                <th style={{ textAlign: "right" }}>Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {filtered.length === 0 ? (
-                                <tr><td colSpan="4" style={{ padding: "30px", textAlign: "center", color: "#94a3b8" }}>No books found.</td></tr>
-                            ) : (
-                                filtered.map((b) => (
-                                    <tr key={b.id}>
-                                        <td>
-                                            <div style={{
-                                                width: "45px", height: "65px", background: "#f1f5f9", borderRadius: "6px",
-                                                overflow: "hidden", border: "1px solid #e2e8f0"
-                                            }}>
-                                                {b.imageUrl ? (
-                                                    <img src={b.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                                                ) : (
-                                                    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px" }}>📖</div>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div style={{ fontWeight: "600", color: "#0f172a", fontSize: "15px" }}>{b.title}</div>
-                                            <div style={{ fontSize: "13px", color: "#64748b" }}>
-                                                {b.authorName || "Unknown Author"} • <span style={{color: "#3b82f6"}}>{b.categoryName || "General"}</span>
-                                            </div>
-                                            <div style={{ fontSize: "11px", color: "#94a3b8", fontFamily: "monospace", marginTop: "2px" }}>
-                                                ISBN: {b.isbn}
-                                            </div>
-                                        </td>
-                                        <td>
-                                                <span className={`badge ${b.available ? "green" : "red"}`}>
-                                                    {b.available ? "Available" : "Borrowed"}
-                                                </span>
-                                        </td>
-                                        <td style={{ textAlign: "right" }}>
-                                            {/* DURUM 1: ADMIN GÖRÜRSE -> SİLME BUTONU */}
-                                            {role === "ADMIN" && (
-                                                <button
-                                                    className="btn-danger"
-                                                    onClick={() => handleDelete(b.id)}
-                                                >
-                                                    Delete
-                                                </button>
-                                            )}
-
-                                            {/* DURUM 2: USER GÖRÜRSE VE MÜSAİTSE -> ÖDÜNÇ AL */}
-                                            {role === "USER" && b.available && (
-                                                <button
-                                                    style={{
-                                                        background: "#2563eb", color: "white", border: "none",
-                                                        padding: "8px 16px", borderRadius: "8px", cursor: "pointer",
-                                                        fontWeight: "500", fontSize: "13px",
-                                                        boxShadow: "0 2px 4px rgba(37, 99, 235, 0.2)"
-                                                    }}
-                                                    onClick={() => handleBorrow(b.id)}
-                                                >
-                                                    Borrow
-                                                </button>
-                                            )}
-
-                                            {/* DURUM 3: USER GÖRÜRSE VE DOLUYSA -> UYARI */}
-                                            {role === "USER" && !b.available && (
-                                                <span style={{ fontSize: "12px", color: "#94a3b8", fontStyle: "italic", paddingRight: "10px" }}>
-                                                        Currently Unavailable
-                                                    </span>
-                                            )}
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </div>
+            {/* --- KİTAP LİSTESİ (GRID) --- */}
+            {loading ? (
+                <div style={{ textAlign: "center", padding: "50px" }}>🔄 Kitaplar yükleniyor...</div>
+            ) : (
+                <div className="book-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "20px" }}>
+                    {filteredBooks.length > 0 ? filteredBooks.map((book) => (
+                        <div key={book.id} className="book-card" style={{ border: "1px solid #eee", borderRadius: "10px", overflow: "hidden", background: "#fff" }}>
+                            <img
+                                src={book.imageUrl || "https://images.unsplash.com/photo-1543004408-6534603a6bcb?q=80&w=1974&auto=format&fit=crop"}
+                                alt={book.title}
+                                style={{ width: "100%", height: "220px", objectFit: "cover" }}
+                            />
+                            <div className="book-info" style={{ padding: "15px" }}>
+                                <h4 style={{ margin: "0 0 5px 0", fontSize: "16px" }}>{book.title}</h4>
+                                <p style={{ fontSize: "13px", color: "#666", marginBottom: "10px" }}>{book.authorName}</p>
+                                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                    <span className={`badge ${book.available ? "ok" : "warn"}`}>
+                                        {book.available ? "Mevcut" : "Ödünçte"}
+                                    </span>
+                                    <button
+                                        onClick={() => handleDelete(book.id)}
+                                        style={{ backgroundColor: "#fee2e2", color: "#b91c1c", border: "none", padding: "5px 10px", borderRadius: "6px", cursor: "pointer", fontSize: "12px" }}
+                                    >
+                                        Sil
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )) : (
+                        <div style={{ gridColumn: "span 4", textAlign: "center", padding: "40px", color: "#94a3b8" }}>
+                            Aranan kriterlere uygun kitap bulunamadı.
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

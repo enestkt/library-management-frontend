@@ -6,45 +6,54 @@ import "../styles/loans.css";
 export default function Loans() {
     const [users, setUsers] = useState([]);
     const [books, setBooks] = useState([]);
-
     const [selectedUser, setSelectedUser] = useState("");
     const [selectedBook, setSelectedBook] = useState("");
-    const [loanId, setLoanId] = useState("");
-
+    const [loanId, setLoanId] = useState(""); // Manuel giriş için hala duruyor
     const [historyUserId, setHistoryUserId] = useState("");
     const [history, setHistory] = useState([]);
     const [msg, setMsg] = useState({ text: "", type: "" });
 
-    useEffect(() => {
-        const load = async () => {
+    // Verileri yükle
+    const loadData = async () => {
+        try {
             const u = await getAllUsers();
             const b = await getAllBooks();
             setUsers(u.data || []);
             setBooks(b.data || []);
-        };
-        load();
+        } catch (error) {
+            console.error("Veri yükleme hatası:", error);
+        }
+    };
+
+    useEffect(() => {
+        loadData();
     }, []);
 
+    // Kitap Ödünç Al
     const handleBorrow = async () => {
         try {
             await borrowBook(selectedBook, selectedUser);
             setMsg({ text: "✅ Kitap başarıyla ödünç verildi!", type: "success" });
-            // Kitap listesini yenile ki o kitap 'Available' olmaktan çıksın
-            const b = await getAllBooks();
-            setBooks(b.data || []);
+            loadData(); // Listeyi tazele
+            if(historyUserId === selectedUser) loadHistory(); // Eğer o kullanıcının geçmişine bakıyorsak orayı da tazele
         } catch {
             setMsg({ text: "❌ Hata oluştu! Kitap müsait olmayabilir.", type: "error" });
         }
     };
 
-    const handleReturn = async () => {
+    // Kitap İade Et (Geliştirilmiş: ID parametresi alabilir)
+    const handleReturn = async (idFromTable) => {
+        const targetId = idFromTable || loanId;
+        if (!targetId) return;
+
         try {
-            await returnBook(loanId);
+            await returnBook(targetId);
             setMsg({ text: "✅ Kitap başarıyla iade alındı!", type: "success" });
-            const b = await getAllBooks(); // Kitabı tekrar müsait yap
-            setBooks(b.data || []);
+            setLoanId(""); // Inputu temizle
+            loadData(); // Kitap müsaitliğini güncelle
+            if (historyUserId) loadHistory(); // Tabloyu güncelle
         } catch {
-            setMsg({ text: "❌ İade işlemi başarısız.", type: "error" });
+            setMsg({ text: "❌ İade işlemi başarısız. ID hatalı olabilir.", type: "error" });
         }
     };
 
@@ -58,22 +67,11 @@ export default function Loans() {
         }
     };
 
-    // Style helper for inputs
-    const inputStyle = {
-        width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #cbd5e1",
-        backgroundColor: "#f8fafc", fontSize: "14px", marginBottom: "16px", outline: "none"
-    };
-
-    const btnStyle = {
-        width: "100%", padding: "12px", borderRadius: "8px", border: "none",
-        color: "white", fontWeight: "600", cursor: "pointer", transition: "0.2s"
-    };
-
     return (
         <div className="page">
             <div className="page-header">
-                <h1>Loan Operations</h1>
-                <p>Process book borrowing and returns</p>
+                <h1>Kütüphane İşlemleri</h1>
+                <p>Ödünç verme ve iade süreçlerini yönetin</p>
             </div>
 
             {msg.text && (
@@ -88,83 +86,59 @@ export default function Loans() {
             )}
 
             <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "24px", marginBottom: "32px" }}>
-
-                {/* --- BORROW CARD --- */}
+                {/* Ödünç Al Kartı */}
                 <div className="card" style={{ borderTop: "4px solid #3b82f6" }}>
-                    <h3 style={{ marginTop: 0, color: "#1e293b" }}>📖 Borrow a Book</h3>
-                    <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "20px" }}>Select a user and an available book.</p>
-
-                    <label style={{ fontSize: "13px", fontWeight: "600", color: "#475569" }}>Select User</label>
-                    <select style={inputStyle} value={selectedUser} onChange={(e) => setSelectedUser(e.target.value)}>
-                        <option value="">-- Choose User --</option>
-                        {users.map((u) => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
+                    <h3>📖 Kitap Ödünç Ver</h3>
+                    <label>Kullanıcı Seç</label>
+                    <select className="form-select" value={selectedUser} onChange={(e) => setSelectedUser(e.target.value)}>
+                        <option value="">-- Kullanıcı Seçin --</option>
+                        {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
                     </select>
 
-                    <label style={{ fontSize: "13px", fontWeight: "600", color: "#475569" }}>Select Book</label>
-                    <select style={inputStyle} value={selectedBook} onChange={(e) => setSelectedBook(e.target.value)}>
-                        <option value="">-- Choose Book --</option>
+                    <label>Kitap Seç</label>
+                    <select className="form-select" value={selectedBook} onChange={(e) => setSelectedBook(e.target.value)}>
+                        <option value="">-- Kitap Seçin --</option>
                         {books.map((b) => (
                             <option key={b.id} value={b.id} disabled={!b.available}>
-                                {b.title} {b.available ? "✅" : "(Borrowed ❌)"}
+                                {b.title} {b.available ? "✅" : "(Ödünçte ❌)"}
                             </option>
                         ))}
                     </select>
 
-                    <button
-                        onClick={handleBorrow} disabled={!selectedUser || !selectedBook}
-                        style={{ ...btnStyle, backgroundColor: "#3b82f6" }}
-                        onMouseOver={(e) => e.target.style.backgroundColor = "#2563eb"}
-                        onMouseOut={(e) => e.target.style.backgroundColor = "#3b82f6"}
-                    >
-                        Confirm Borrow
+                    <button onClick={handleBorrow} disabled={!selectedUser || !selectedBook} className="btn-primary">
+                        Ödünç İşlemini Onayla
                     </button>
                 </div>
 
-                {/* --- RETURN CARD --- */}
+                {/* Manuel İade Kartı (Opsiyonel olarak duruyor) */}
                 <div className="card" style={{ borderTop: "4px solid #f97316" }}>
-                    <h3 style={{ marginTop: 0, color: "#1e293b" }}>↩️ Return a Book</h3>
-                    <p style={{ fontSize: "13px", color: "#64748b", marginBottom: "20px" }}>Enter the Loan ID to process return.</p>
-
-                    <label style={{ fontSize: "13px", fontWeight: "600", color: "#475569" }}>Loan ID</label>
+                    <h3>↩️ Hızlı İade (ID ile)</h3>
                     <input
-                        style={inputStyle}
-                        placeholder="Enter Loan ID (e.g. 5)"
+                        className="form-input"
+                        placeholder="Loan ID giriniz..."
                         value={loanId}
                         onChange={(e) => setLoanId(e.target.value)}
                     />
-
-                    <div style={{ height: "76px" }}></div> {/* Spacer to align buttons */}
-
-                    <button
-                        onClick={handleReturn} disabled={!loanId}
-                        style={{ ...btnStyle, backgroundColor: "#f97316" }}
-                        onMouseOver={(e) => e.target.style.backgroundColor = "#ea580c"}
-                        onMouseOut={(e) => e.target.style.backgroundColor = "#f97316"}
-                    >
-                        Confirm Return
+                    <button onClick={() => handleReturn()} disabled={!loanId} className="btn-orange">
+                        İadeyi Tamamla
                     </button>
                 </div>
             </div>
 
-            {/* --- HISTORY SECTION --- */}
+            {/* GEÇMİŞ VE İADE TABLOSU */}
             <div className="card">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-                    <h3 style={{ margin: 0 }}>📜 Loan History</h3>
+                    <h3 style={{ margin: 0 }}>📜 Ödünç Geçmişi ve İade Paneli</h3>
                     <div style={{ display: "flex", gap: "10px" }}>
                         <select
-                            style={{ padding: "8px", borderRadius: "6px", border: "1px solid #cbd5e1" }}
+                            className="form-select-sm"
                             value={historyUserId}
                             onChange={(e) => setHistoryUserId(e.target.value)}
                         >
-                            <option value="">Filter by User</option>
+                            <option value="">Kullanıcı Filtrele</option>
                             {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
                         </select>
-                        <button
-                            onClick={loadHistory} disabled={!historyUserId}
-                            style={{ padding: "8px 16px", background: "#475569", color: "white", border: "none", borderRadius: "6px", cursor: "pointer" }}
-                        >
-                            Load
-                        </button>
+                        <button onClick={loadHistory} className="btn-dark">Listele</button>
                     </div>
                 </div>
 
@@ -172,21 +146,22 @@ export default function Loans() {
                     <table className="table">
                         <thead>
                         <tr>
-                            <th>Loan ID</th>
-                            <th>Book Title</th>
-                            <th>Status</th>
-                            <th>Loan Date</th>
-                            <th>Return Date</th>
+                            <th>ID</th>
+                            <th>Kitap</th>
+                            <th>Durum</th>
+                            <th>Alış Tarihi</th>
+                            <th>İade Tarihi</th>
+                            <th>İşlem</th>
                         </tr>
                         </thead>
                         <tbody>
                         {history.length === 0 ? (
-                            <tr><td colSpan="5" style={{ textAlign: "center", padding: "30px", color: "#94a3b8" }}>No records found. Select a user to view history.</td></tr>
+                            <tr><td colSpan="6" className="text-center">Kayıt bulunamadı.</td></tr>
                         ) : (
                             history.map((l) => (
                                 <tr key={l.loanId || l.id}>
-                                    <td style={{ fontWeight: "600", color: "#64748b" }}>#{l.loanId || l.id}</td>
-                                    <td style={{ fontWeight: "500", color: "#0f172a" }}>{l.bookTitle || l.book?.title}</td>
+                                    <td>#{l.loanId || l.id}</td>
+                                    <td>{l.bookTitle || l.book?.title}</td>
                                     <td>
                                             <span className={`badge ${l.status === "BORROWED" ? "warn" : "ok"}`}>
                                                 {l.status}
@@ -194,6 +169,16 @@ export default function Loans() {
                                     </td>
                                     <td>{l.loanDate}</td>
                                     <td>{l.returnDate || "-"}</td>
+                                    <td>
+                                        {l.status === "BORROWED" && (
+                                            <button
+                                                onClick={() => handleReturn(l.loanId || l.id)}
+                                                className="btn-return-sm"
+                                            >
+                                                İade Et
+                                            </button>
+                                        )}
+                                    </td>
                                 </tr>
                             ))
                         )}
