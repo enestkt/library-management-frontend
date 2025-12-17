@@ -3,80 +3,35 @@ import { Link } from "react-router-dom";
 import { getAllBooks } from "../api/bookService";
 import { getAllLoans } from "../api/loanService";
 import "../styles/layout.css";
+import "../styles/dashboard.css"; // Yeni CSS dosyamızı import ettiğinden emin ol
 
 /* ---------- STAT CARD COMPONENT ---------- */
-// Dashboard.jsx içindeki StatCard bileşeni
 function StatCard({ title, value, icon, colorClass }) {
     return (
         <div className={`card stat-card ${colorClass}`}>
-            <span className="stat-title">{title}</span>
+            <div className="stat-header">
+                <span className="stat-title">{title}</span>
+                <span className="stat-icon">{icon}</span>
+            </div>
             <div className="stat-value">{value}</div>
-            <span className="stat-icon">{icon}</span>
         </div>
     );
 }
-
-// Render kısmı (return)
-return (
-    <div className="page">
-        <div className="page-header">
-            <div>
-                <h1>Kontrol Paneli</h1>
-                <p>Tekrar hoş geldiniz, Yönetici 👋</p>
-            </div>
-            <div className="date-display">{today}</div>
-        </div>
-
-        <div className="grid-stats">
-            <StatCard title="Toplam Kitap" value={bookStats.total} icon="📚" colorClass="card-blue" />
-            <StatCard title="Aktif Ödünçler" value={loanStats.active} icon="⏳" colorClass="card-orange" />
-            <StatCard title="Müsait Kitaplar" value={bookStats.available} icon="✅" colorClass="card-green" />
-            <StatCard title="Toplam Kullanıcı" value={loanStats.total} icon="👥" colorClass="card-purple" />
-        </div>
-
-        <div className="dashboard-main-grid">
-            <div className="card recent-activity">
-                <div className="card-header">
-                    <h3>Son İşlemler</h3>
-                    <Link to="/dashboard/loans" className="view-all">Tümünü Gör →</Link>
-                </div>
-                <div className="table-wrap">
-                    <table className="table">
-                        {/* ... Tablo İçeriği ... */}
-                    </table>
-                </div>
-            </div>
-
-            <div className="side-panels">
-                <div className="card status-card">
-                    <h3>Kütüphane Durumu</h3>
-                    <ProgressBar label="Müsait" value={bookStats.available} total={bookStats.total} color="#22c55e" />
-                    <ProgressBar label="Ödünçte" value={bookStats.borrowed} total={bookStats.total} color="#f97316" />
-                </div>
-
-                <div className="card quick-actions-dark">
-                    <h3>Hızlı İşlemler</h3>
-                    <div className="action-buttons">
-                        <Link to="/dashboard/books" className="btn-glass">+ Yeni Kitap</Link>
-                        <Link to="/dashboard/users" className="btn-glass">Kullanıcıları Yönet</Link>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-);
 
 /* ---------- PROGRESS BAR COMPONENT ---------- */
 function ProgressBar({ label, value, total, color }) {
     const percent = total > 0 ? Math.round((value / total) * 100) : 0;
     return (
-        <div style={{ marginBottom: "16px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px", fontSize: "13px", color: "#64748b", fontWeight: "500" }}>
+        <div className="progress-container">
+            <div className="progress-info">
                 <span>{label}</span>
                 <span>{value} / {total} ({percent}%)</span>
             </div>
-            <div style={{ width: "100%", height: "8px", background: "#f1f5f9", borderRadius: "99px", overflow: "hidden" }}>
-                <div style={{ width: `${percent}%`, height: "100%", background: color, borderRadius: "99px", transition: "width 0.5s ease" }}></div>
+            <div className="progress-bar-bg">
+                <div
+                    className="progress-bar-fill"
+                    style={{ width: `${percent}%`, background: color }}
+                ></div>
             </div>
         </div>
     );
@@ -141,8 +96,8 @@ export default function Dashboard() {
 
     if (loading) {
         return (
-            <div className="page" style={{ display:"flex", justifyContent:"center", alignItems:"center", height:"80vh" }}>
-                <div style={{ fontSize: "18px", color: "#64748b" }}>Dashboard verileri yükleniyor...</div>
+            <div className="loading-screen">
+                <div className="loader-text">Dashboard verileri yükleniyor...</div>
             </div>
         );
     }
@@ -150,18 +105,18 @@ export default function Dashboard() {
     return (
         <div className="page">
             {/* HEADER */}
-            <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "end" }}>
+            <div className="page-header">
                 <div>
                     <h1>Kontrol Paneli</h1>
                     <p>Tekrar hoş geldiniz, Yönetici 👋</p>
                 </div>
-                <div style={{ fontSize: "14px", color: "#94a3b8", fontWeight: "500" }}>
+                <div className="date-display">
                     {today}
                 </div>
             </div>
 
             {/* STAT KARTLARI */}
-            <div className="grid-3" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", marginBottom: "32px" }}>
+            <div className="grid-stats">
                 <StatCard
                     title="Toplam Kitap"
                     value={bookStats.total}
@@ -189,13 +144,13 @@ export default function Dashboard() {
             </div>
 
             {/* ANA ALAN */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "24px" }}>
+            <div className="dashboard-main-grid">
 
                 {/* SON İŞLEMLER */}
-                <div className="card" style={{ gridColumn: "span 2" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+                <div className="card recent-activity">
+                    <div className="card-header">
                         <h3>Son İşlemler</h3>
-                        <Link to="/dashboard/loans" style={{ fontSize: "13px", color: "#3b82f6", textDecoration: "none", fontWeight: "600" }}>
+                        <Link to="/dashboard/loans" className="view-all">
                             Tümünü Gör →
                         </Link>
                     </div>
@@ -213,7 +168,7 @@ export default function Dashboard() {
                             <tbody>
                             {loanStats.recent.length === 0 ? (
                                 <tr>
-                                    <td colSpan="4" style={{textAlign:"center", color:"#94a3b8", padding:"20px"}}>
+                                    <td colSpan="4" className="empty-row">
                                         Herhangi bir işlem bulunamadı.
                                     </td>
                                 </tr>
@@ -222,7 +177,7 @@ export default function Dashboard() {
                                     <tr key={l.id}>
                                         <td className="td-title">{l.book?.title || "Bilinmeyen Kitap"}</td>
                                         <td>{l.user?.email || "Bilinmeyen Kullanıcı"}</td>
-                                        <td style={{ color: "#64748b", fontSize: "13px" }}>{l.loanDate}</td>
+                                        <td className="td-date">{l.loanDate}</td>
                                         <td>
                                             <span className={`badge ${l.status === "BORROWED" ? "warn" : "ok"}`}>
                                                 {l.status === "BORROWED" ? "Ödünçte" : "İade Edildi"}
@@ -237,11 +192,11 @@ export default function Dashboard() {
                 </div>
 
                 {/* SAĞ PANEL */}
-                <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+                <div className="side-panels">
 
-                    <div className="card">
+                    <div className="card status-card">
                         <h3>Kütüphane Durumu</h3>
-                        <div style={{ marginTop: "20px" }}>
+                        <div className="progress-section">
                             <ProgressBar
                                 label="Müsait Kitaplar"
                                 value={bookStats.available}
@@ -257,28 +212,19 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    <div className="card" style={{ background: "linear-gradient(135deg, #1e293b 0%, #0f172a 100%)", color: "white" }}>
-                        <h3 style={{ color: "white", marginBottom: "10px" }}>Hızlı İşlemler</h3>
-                        <p style={{ fontSize: "13px", color: "#94a3b8", marginBottom: "20px" }}>
-                            Kütüphanenizi hızlı ve kolay yönetin.
-                        </p>
+                    <div className="card quick-actions-dark">
+                        <h3>Hızlı İşlemler</h3>
+                        <p>Kütüphanenizi hızlı ve kolay yönetin.</p>
 
-                        <div style={{ display: "flex", gap: "10px", flexDirection: "column" }}>
-                            <Link to="/dashboard/books" style={{
-                                textAlign: "center", padding: "10px", background: "rgba(255,255,255,0.1)",
-                                color: "white", borderRadius: "8px", textDecoration: "none", fontSize: "14px", fontWeight: "500", transition: "0.2s"
-                            }}>
+                        <div className="action-buttons">
+                            <Link to="/dashboard/books" className="btn-glass">
                                 + Yeni Kitap Ekle
                             </Link>
-                            <Link to="/dashboard/users" style={{
-                                textAlign: "center", padding: "10px", background: "rgba(255,255,255,0.1)",
-                                color: "white", borderRadius: "8px", textDecoration: "none", fontSize: "14px", fontWeight: "500", transition: "0.2s"
-                            }}>
+                            <Link to="/dashboard/users" className="btn-glass">
                                 Kullanıcıları Yönet
                             </Link>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>

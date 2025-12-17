@@ -1,51 +1,19 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
 import "../styles/layout.css";
 
 function DashboardLayout() {
-    const navigate = useNavigate();
-
-    const logout = () => {
-        localStorage.removeItem("token");
-        navigate("/login");
-    };
-
     return (
         <div className="layout">
-            {/* SIDEBAR */}
-            <aside className="sidebar">
-                <div className="logo">📚 Library</div>
+            {/* Sol taraf sabit Sidebar */}
+            <Sidebar />
 
-                <nav className="menu">
-                    <NavLink to="/dashboard" end>
-                        Dashboard
-                    </NavLink>
-
-                    <NavLink to="/dashboard/books">
-                        Books
-                    </NavLink>
-
-                    <NavLink to="/dashboard/users">
-                        Users
-                    </NavLink>
-
-                    <NavLink to="/dashboard/loans">
-                        Loans
-                    </NavLink>
-                </nav>
-            </aside>
-
-            {/* MAIN AREA */}
+            {/* Sağ taraf Navbar + Değişen İçerik */}
             <div className="main">
-                {/* NAVBAR */}
-                <header className="navbar">
-                    <div className="title">Library Management System</div>
-                    <button className="logout-btn" onClick={logout}>
-                        Logout
-                    </button>
-                </header>
-
-                {/* CONTENT */}
+                <Navbar />
                 <main className="content">
+                    {/* Sayfalar (Dashboard, Books vb.) buraya gelir */}
                     <Outlet />
                 </main>
             </div>

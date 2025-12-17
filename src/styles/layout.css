@@ -1,14 +1,15 @@
-/* Ana Layout Konteyneri */
+/* Ana Taşıyıcı */
 .layout {
     display: flex;
+    width: 100%;
     min-height: 100vh;
-    background-color: #f8fafc; /* Yumuşak arka plan */
+    background-color: #f8fafc;
 }
 
-/* SIDEBAR - Modern ve Temiz */
+/* SIDEBAR TASARIMI */
 .sidebar {
-    width: 260px;
-    background: #1e293b; /* Koyu modern lacivert */
+    width: 280px;
+    background: #1e293b; /* Koyu premium lacivert */
     color: white;
     padding: 32px 20px;
     display: flex;
@@ -18,18 +19,20 @@
     height: 100vh;
 }
 
-/* Logo Hizalaması */
-.sidebar .logo {
-    font-size: 22px;
-    font-weight: 800;
-    margin-bottom: 48px;
-    padding-left: 12px;
+.logo-section {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    padding: 0 12px 40px 12px;
 }
 
-/* Menü Linkleri */
+.logo-text {
+    font-size: 20px;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
 .menu {
     display: flex;
     flex-direction: column;
@@ -39,49 +42,55 @@
 .menu a {
     color: #94a3b8;
     text-decoration: none;
-    padding: 12px 16px;
-    border-radius: 12px;
+    padding: 14px 16px;
+    border-radius: 14px;
     font-weight: 600;
-    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: 0.2s;
 }
 
 .menu a:hover, .menu a.active {
     background: rgba(255, 255, 255, 0.1);
     color: white;
 }
-/* Ana İçerik Alanı */
+
+/* SAĞ TARAF VE NAVBAR */
 .main {
     flex: 1;
     display: flex;
     flex-direction: column;
-    min-width: 0; /* Taşıp kaymayı önler */
+    min-width: 0;
 }
 
-/* Üst Navbar */
 .navbar {
     height: 70px;
     background: white;
+    border-bottom: 1px solid #e2e8f0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 40px;
-    border-bottom: 1px solid #e2e8f0;
 }
 
-.navbar .title {
-    font-weight: 700;
-    color: #64748b;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-/* Sayfa İçeriği Konteyneri */
 .content {
     padding: 40px;
     overflow-y: auto;
 }
-/* === MENU FIX (KRİTİK) === */
-.menu a {
-    display: block;
+
+/* ÇIKIŞ BUTONU */
+.logout-btn {
+    background: #fee2e2;
+    color: #ef4444;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.logout-btn:hover {
+    background: #fecaca;
 }

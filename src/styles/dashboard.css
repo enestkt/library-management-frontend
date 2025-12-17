@@ -1,76 +1,8 @@
-
-
-/* Üst Düzey Kartlar */
-.card {
-    background: var(--white);
-    border-radius: 24px;
-    padding: 30px;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--card-shadow);
-}
-
-/* KPI Kartları - Dinamik Renkler */
-.stat-card {
-    min-height: 160px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    position: relative;
-    overflow: hidden;
-    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.stat-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
-}
-
-.stat-value {
-    font-size: 42px;
-    font-weight: 800;
-    z-index: 2;
-}
-
-.stat-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    z-index: 2;
-}
-
-/* Dekoratif Arka Plan İkonları */
-.stat-icon {
-    position: absolute;
-    right: -15px;
-    bottom: -15px;
-    font-size: 100px;
-    opacity: 0.08;
-    z-index: 1;
-}
-
-/* Renk Grupları */
-.card-blue { border-bottom: 6px solid #6366f1; }
-.card-green { border-bottom: 6px solid #10b981; }
-.card-orange { border-bottom: 6px solid #f59e0b; }
-.card-purple { border-bottom: 6px solid #8b5cf6; }
-
-/* Tablo Güzelleştirme */
-.table th {
-    padding: 18px;
-    color: var(--text-muted);
-    font-weight: 700;
-    border-bottom: 2px solid var(--border-color);
-}
-
-.table td {
-    padding: 18px;
-    font-weight: 500;
-}
+/* Dashboard Başlık Alanı */
 .page-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end; /* Yazıları alt çizgiye göre hizalar */
+    align-items: flex-end;
     margin-bottom: 40px;
 }
 
@@ -81,8 +13,59 @@
     letter-spacing: -1px;
 }
 
-.page-header p {
-    color: #64748b;
-    margin: 5px 0 0 0;
-    font-size: 15px;
+/* İstatistik Kartları Grid Yapısı */
+.grid-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+/* Ana İçerik Grid (Sol: Tablo, Sağ: Paneller) */
+.dashboard-main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+
+/* StatCard Renk Çizgileri */
+.card-blue { border-bottom: 5px solid #6366f1; }
+.card-orange { border-bottom: 5px solid #f59e0b; }
+.card-green { border-bottom: 5px solid #10b981; }
+.card-purple { border-bottom: 5px solid #8b5cf6; }
+
+/* Hızlı İşlemler Butonları */
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.btn-glass {
+    display: block;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    color: white;
+    text-decoration: none;
+    text-align: center;
+    font-weight: 600;
+    transition: 0.3s ease;
+}
+
+.btn-glass:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Koyu Hızlı İşlemler Kartı */
+.quick-actions-dark {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: white !important;
+}
+
+.quick-actions-dark h3 {
+    color: white;
 }
