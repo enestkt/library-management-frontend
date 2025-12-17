@@ -8,12 +8,10 @@ export default function Loans() {
     const [books, setBooks] = useState([]);
     const [selectedUser, setSelectedUser] = useState("");
     const [selectedBook, setSelectedBook] = useState("");
-    const [loanId, setLoanId] = useState(""); // Manuel giriş için hala duruyor
     const [historyUserId, setHistoryUserId] = useState("");
     const [history, setHistory] = useState([]);
     const [msg, setMsg] = useState({ text: "", type: "" });
 
-    // Verileri yükle
     const loadData = async () => {
         try {
             const u = await getAllUsers();
@@ -21,7 +19,7 @@ export default function Loans() {
             setUsers(u.data || []);
             setBooks(b.data || []);
         } catch (error) {
-            console.error("Veri yükleme hatası:", error);
+            console.error("Yükleme hatası:", error);
         }
     };
 
@@ -29,31 +27,25 @@ export default function Loans() {
         loadData();
     }, []);
 
-    // Kitap Ödünç Al
     const handleBorrow = async () => {
         try {
             await borrowBook(selectedBook, selectedUser);
             setMsg({ text: "✅ Kitap başarıyla ödünç verildi!", type: "success" });
-            loadData(); // Listeyi tazele
-            if(historyUserId === selectedUser) loadHistory(); // Eğer o kullanıcının geçmişine bakıyorsak orayı da tazele
+            loadData();
+            if (historyUserId) loadHistory();
         } catch {
-            setMsg({ text: "❌ Hata oluştu! Kitap müsait olmayabilir.", type: "error" });
+            setMsg({ text: "❌ Hata: Kitap şu an ödünç verilemiyor.", type: "error" });
         }
     };
 
-    // Kitap İade Et (Geliştirilmiş: ID parametresi alabilir)
-    const handleReturn = async (idFromTable) => {
-        const targetId = idFromTable || loanId;
-        if (!targetId) return;
-
+    const handleReturn = async (id) => {
         try {
-            await returnBook(targetId);
-            setMsg({ text: "✅ Kitap başarıyla iade alındı!", type: "success" });
-            setLoanId(""); // Inputu temizle
-            loadData(); // Kitap müsaitliğini güncelle
-            if (historyUserId) loadHistory(); // Tabloyu güncelle
+            await returnBook(id);
+            setMsg({ text: "✅ Kitap iade alındı!", type: "success" });
+            loadData();
+            if (historyUserId) loadHistory();
         } catch {
-            setMsg({ text: "❌ İade işlemi başarısız. ID hatalı olabilir.", type: "error" });
+            setMsg({ text: "❌ İade işlemi başarısız oldu.", type: "error" });
         }
     };
 
@@ -70,120 +62,131 @@ export default function Loans() {
     return (
         <div className="page">
             <div className="page-header">
-                <h1>Kütüphane İşlemleri</h1>
-                <p>Ödünç verme ve iade süreçlerini yönetin</p>
+                <h1>Ödünç Yönetim Merkezi</h1>
+                <p>Kitap sirkülasyonunu ve kullanıcı geçmişini buradan kontrol edin.</p>
             </div>
 
+            {/* Mesaj Bildirimi */}
             {msg.text && (
                 <div style={{
-                    marginBottom: "20px", padding: "14px", borderRadius: "10px",
-                    background: msg.type === "success" ? "#dcfce7" : "#fee2e2",
-                    color: msg.type === "success" ? "#166534" : "#991b1b",
-                    fontWeight: "600", textAlign: "center"
+                    padding: "15px", borderRadius: "12px", marginBottom: "25px",
+                    backgroundColor: msg.type === "success" ? "#ecfdf5" : "#fef2f2",
+                    color: msg.type === "success" ? "#065f46" : "#991b1b",
+                    border: `1px solid ${msg.type === "success" ? "#10b981" : "#f87171"}`,
+                    fontWeight: "600", textAlign: "center", animation: "slideIn 0.5s"
                 }}>
                     {msg.text}
                 </div>
             )}
 
-            <div className="grid-2" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "24px", marginBottom: "32px" }}>
-                {/* Ödünç Al Kartı */}
-                <div className="card" style={{ borderTop: "4px solid #3b82f6" }}>
-                    <h3>📖 Kitap Ödünç Ver</h3>
-                    <label>Kullanıcı Seç</label>
-                    <select className="form-select" value={selectedUser} onChange={(e) => setSelectedUser(e.target.value)}>
-                        <option value="">-- Kullanıcı Seçin --</option>
-                        {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
-                    </select>
+            <div className="grid-layout" style={{ display: "grid", gridTemplateColumns: "1fr", gap: "30px" }}>
 
-                    <label>Kitap Seç</label>
-                    <select className="form-select" value={selectedBook} onChange={(e) => setSelectedBook(e.target.value)}>
-                        <option value="">-- Kitap Seçin --</option>
-                        {books.map((b) => (
-                            <option key={b.id} value={b.id} disabled={!b.available}>
-                                {b.title} {b.available ? "✅" : "(Ödünçte ❌)"}
-                            </option>
-                        ))}
-                    </select>
-
-                    <button onClick={handleBorrow} disabled={!selectedUser || !selectedBook} className="btn-primary">
-                        Ödünç İşlemini Onayla
-                    </button>
-                </div>
-
-                {/* Manuel İade Kartı (Opsiyonel olarak duruyor) */}
-                <div className="card" style={{ borderTop: "4px solid #f97316" }}>
-                    <h3>↩️ Hızlı İade (ID ile)</h3>
-                    <input
-                        className="form-input"
-                        placeholder="Loan ID giriniz..."
-                        value={loanId}
-                        onChange={(e) => setLoanId(e.target.value)}
-                    />
-                    <button onClick={() => handleReturn()} disabled={!loanId} className="btn-orange">
-                        İadeyi Tamamla
-                    </button>
-                </div>
-            </div>
-
-            {/* GEÇMİŞ VE İADE TABLOSU */}
-            <div className="card">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-                    <h3 style={{ margin: 0 }}>📜 Ödünç Geçmişi ve İade Paneli</h3>
-                    <div style={{ display: "flex", gap: "10px" }}>
-                        <select
-                            className="form-select-sm"
-                            value={historyUserId}
-                            onChange={(e) => setHistoryUserId(e.target.value)}
+                {/* --- BORROW SECTION --- */}
+                <div className="card" style={{ borderLeft: "6px solid #3b82f6" }}>
+                    <h2 style={{ marginBottom: "20px", display: "flex", alignItems: "center", gap: "10px" }}>
+                        <span>📖</span> Yeni Ödünç İşlemi
+                    </h2>
+                    <div style={{ display: "flex", gap: "20px", flexWrap: "wrap", alignItems: "flex-end" }}>
+                        <div style={{ flex: 1, minWidth: "250px" }}>
+                            <label style={{ display: "block", marginBottom: "8px", fontWeight: "600" }}>Kullanıcı</label>
+                            <select
+                                style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+                                value={selectedUser} onChange={(e) => setSelectedUser(e.target.value)}
+                            >
+                                <option value="">Bir kullanıcı seçin...</option>
+                                {users.map(u => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
+                            </select>
+                        </div>
+                        <div style={{ flex: 1, minWidth: "250px" }}>
+                            <label style={{ display: "block", marginBottom: "8px", fontWeight: "600" }}>Kitap</label>
+                            <select
+                                style={{ width: "100%", padding: "12px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+                                value={selectedBook} onChange={(e) => setSelectedBook(e.target.value)}
+                            >
+                                <option value="">Bir kitap seçin...</option>
+                                {books.map(b => (
+                                    <option key={b.id} value={b.id} disabled={!b.available}>
+                                        {b.title} {b.available ? " (Mevcut ✅)" : " (Ödünçte ❌)"}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <button
+                            onClick={handleBorrow}
+                            disabled={!selectedUser || !selectedBook}
+                            className="btn-primary"
+                            style={{ padding: "12px 30px", height: "48px" }}
                         >
-                            <option value="">Kullanıcı Filtrele</option>
-                            {users.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
-                        </select>
-                        <button onClick={loadHistory} className="btn-dark">Listele</button>
+                            Ödünç Ver
+                        </button>
                     </div>
                 </div>
 
-                <div className="table-wrap">
-                    <table className="table">
-                        <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Kitap</th>
-                            <th>Durum</th>
-                            <th>Alış Tarihi</th>
-                            <th>İade Tarihi</th>
-                            <th>İşlem</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {history.length === 0 ? (
-                            <tr><td colSpan="6" className="text-center">Kayıt bulunamadı.</td></tr>
-                        ) : (
-                            history.map((l) => (
-                                <tr key={l.loanId || l.id}>
-                                    <td>#{l.loanId || l.id}</td>
-                                    <td>{l.bookTitle || l.book?.title}</td>
-                                    <td>
-                                            <span className={`badge ${l.status === "BORROWED" ? "warn" : "ok"}`}>
-                                                {l.status}
-                                            </span>
-                                    </td>
-                                    <td>{l.loanDate}</td>
-                                    <td>{l.returnDate || "-"}</td>
-                                    <td>
-                                        {l.status === "BORROWED" && (
-                                            <button
-                                                onClick={() => handleReturn(l.loanId || l.id)}
-                                                className="btn-return-sm"
-                                            >
-                                                İade Et
-                                            </button>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                        </tbody>
-                    </table>
+                {/* --- HISTORY & RETURN SECTION --- */}
+                <div className="card" style={{ borderLeft: "6px solid #f97316" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "25px", flexWrap: "wrap", gap: "15px" }}>
+                        <h2 style={{ margin: 0, display: "flex", alignItems: "center", gap: "10px" }}>
+                            <span>📜</span> Kullanıcı İşlem Geçmişi
+                        </h2>
+                        <div style={{ display: "flex", gap: "10px" }}>
+                            <select
+                                style={{ padding: "10px", borderRadius: "8px", border: "1px solid #cbd5e1" }}
+                                value={historyUserId} onChange={(e) => setHistoryUserId(e.target.value)}
+                            >
+                                <option value="">Kullanıcıya göre filtrele...</option>
+                                {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+                            </select>
+                            <button onClick={loadHistory} disabled={!historyUserId} className="btn-dark">Sorgula</button>
+                        </div>
+                    </div>
+
+                    <div className="table-wrap">
+                        <table className="table">
+                            <thead>
+                            <tr>
+                                <th>İşlem ID</th>
+                                <th>Kitap Başlığı</th>
+                                <th>Durum</th>
+                                <th>Ödünç Tarihi</th>
+                                <th>İşlem</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {history.length === 0 ? (
+                                <tr><td colSpan="5" style={{ textAlign: "center", padding: "40px", color: "#94a3b8" }}>Görüntülenecek kayıt bulunamadı.</td></tr>
+                            ) : (
+                                history.map((l) => (
+                                    <tr key={l.id}>
+                                        <td style={{ fontWeight: "bold" }}>#{l.id}</td>
+                                        <td>{l.bookTitle}</td>
+                                        <td>
+                                                <span className={`badge ${l.status === "BORROWED" ? "warn" : "ok"}`}>
+                                                    {l.status === "BORROWED" ? "Teslim Edilmedi" : "İade Edildi"}
+                                                </span>
+                                        </td>
+                                        <td>{l.loanDate}</td>
+                                        <td>
+                                            {l.status === "BORROWED" && (
+                                                <button
+                                                    onClick={() => handleReturn(l.id)}
+                                                    style={{
+                                                        backgroundColor: "#f97316", color: "white", border: "none",
+                                                        padding: "8px 15px", borderRadius: "6px", cursor: "pointer",
+                                                        fontWeight: "bold", transition: "0.3s"
+                                                    }}
+                                                    onMouseOver={(e) => e.target.style.backgroundColor = "#ea580c"}
+                                                    onMouseOut={(e) => e.target.style.backgroundColor = "#f97316"}
+                                                >
+                                                    İade Al ↩️
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
