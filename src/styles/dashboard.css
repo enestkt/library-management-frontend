@@ -1,10 +1,4 @@
-/* Sayfa Başlığı */
-.page-header h1 {
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: -1px;
-    margin-bottom: 5px;
-}
+
 
 /* Üst Düzey Kartlar */
 .card {
@@ -72,4 +66,23 @@
 .table td {
     padding: 18px;
     font-weight: 500;
+}
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end; /* Yazıları alt çizgiye göre hizalar */
+    margin-bottom: 40px;
+}
+
+.page-header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -1px;
+}
+
+.page-header p {
+    color: #64748b;
+    margin: 5px 0 0 0;
+    font-size: 15px;
 }
