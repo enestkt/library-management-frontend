@@ -5,17 +5,66 @@ import { getAllLoans } from "../api/loanService";
 import "../styles/layout.css";
 
 /* ---------- STAT CARD COMPONENT ---------- */
+// Dashboard.jsx içindeki StatCard bileşeni
 function StatCard({ title, value, icon, colorClass }) {
     return (
         <div className={`card stat-card ${colorClass}`}>
-            <div className="stat-header">
-                <span className="stat-title">{title}</span>
-                <span className="stat-icon">{icon}</span>
-            </div>
+            <span className="stat-title">{title}</span>
             <div className="stat-value">{value}</div>
+            <span className="stat-icon">{icon}</span>
         </div>
     );
 }
+
+// Render kısmı (return)
+return (
+    <div className="page">
+        <div className="page-header">
+            <div>
+                <h1>Kontrol Paneli</h1>
+                <p>Tekrar hoş geldiniz, Yönetici 👋</p>
+            </div>
+            <div className="date-display">{today}</div>
+        </div>
+
+        <div className="grid-stats">
+            <StatCard title="Toplam Kitap" value={bookStats.total} icon="📚" colorClass="card-blue" />
+            <StatCard title="Aktif Ödünçler" value={loanStats.active} icon="⏳" colorClass="card-orange" />
+            <StatCard title="Müsait Kitaplar" value={bookStats.available} icon="✅" colorClass="card-green" />
+            <StatCard title="Toplam Kullanıcı" value={loanStats.total} icon="👥" colorClass="card-purple" />
+        </div>
+
+        <div className="dashboard-main-grid">
+            <div className="card recent-activity">
+                <div className="card-header">
+                    <h3>Son İşlemler</h3>
+                    <Link to="/dashboard/loans" className="view-all">Tümünü Gör →</Link>
+                </div>
+                <div className="table-wrap">
+                    <table className="table">
+                        {/* ... Tablo İçeriği ... */}
+                    </table>
+                </div>
+            </div>
+
+            <div className="side-panels">
+                <div className="card status-card">
+                    <h3>Kütüphane Durumu</h3>
+                    <ProgressBar label="Müsait" value={bookStats.available} total={bookStats.total} color="#22c55e" />
+                    <ProgressBar label="Ödünçte" value={bookStats.borrowed} total={bookStats.total} color="#f97316" />
+                </div>
+
+                <div className="card quick-actions-dark">
+                    <h3>Hızlı İşlemler</h3>
+                    <div className="action-buttons">
+                        <Link to="/dashboard/books" className="btn-glass">+ Yeni Kitap</Link>
+                        <Link to="/dashboard/users" className="btn-glass">Kullanıcıları Yönet</Link>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+);
 
 /* ---------- PROGRESS BAR COMPONENT ---------- */
 function ProgressBar({ label, value, total, color }) {

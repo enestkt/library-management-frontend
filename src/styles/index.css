@@ -1,27 +1,20 @@
-/* Google Fonts - Inter */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+    --bg-main: #f8fafc;
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --text-dark: #0f172a;
+    --text-muted: #64748b;
+    --white: #ffffff;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    --border-color: #f1f5f9;
+}
 
 body {
     margin: 0;
     padding: 0;
-    background-color: #f3f4f6; /* Daha yumuşak gri */
-    font-family: 'Inter', sans-serif; /* Modern font */
-    color: #1f2937; /* Tam siyah değil, koyu gri (göz yormaz) */
-    -webkit-font-smoothing: antialiased;
-}
-
-/* Scrollbar Güzelleştirme */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background-color: var(--bg-main);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--text-dark);
 }
