@@ -1,87 +1,78 @@
-// src/pages/Register.jsx
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
 import { registerRequest } from "../api/api";
+import { useNavigate, Link } from "react-router-dom";
 import "../styles/auth.css";
 
-function Register() {
-    const navigate = useNavigate();
+export default function Register() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+    const navigate = useNavigate();
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        setError("");
-
         try {
-            const res = await registerRequest(name, email, password);
-            // Kayıt sonrası otomatik login yapıp token'ı kaydediyoruz
-            if(res.data.token) {
-                localStorage.setItem("token", res.data.token);
-                navigate("/dashboard");
-            } else {
-                navigate("/login");
-            }
+            await registerRequest(name, email, password);
+            alert("✅ Kayıt başarılı! Şimdi giriş yapabilirsiniz.");
+            navigate("/login");
         } catch (err) {
-            setError("Kayıt işlemi başarısız. Lütfen bilgileri kontrol edin.");
+            alert("❌ Kayıt hatası: Bu e-posta zaten kullanımda olabilir.");
         }
     };
 
+    const inputStyle = {
+        width: "100%",
+        padding: "12px",
+        marginBottom: "15px",
+        borderRadius: "8px",
+        border: "1px solid #cbd5e1",
+        fontSize: "14px",
+        outline: "none"
+    };
+
+    const buttonStyle = {
+        width: "100%",
+        padding: "12px",
+        borderRadius: "8px",
+        border: "none",
+        backgroundColor: "#10b981",
+        color: "white",
+        fontSize: "16px",
+        fontWeight: "600",
+        cursor: "pointer"
+    };
+
     return (
-        <div className="auth-page">
-            <form className="auth-card" onSubmit={handleRegister}>
-                <h2>Create Account</h2>
-                <p style={{ textAlign: "center", color: "#6b7280", marginBottom: "24px", fontSize: "14px" }}>
-                    Join library management system
-                </p>
-
-                {error && <div className="auth-error">{error}</div>}
-
-                <div className="auth-field">
-                    <label>Full Name</label>
-                    <input
-                        type="text"
-                        placeholder="John Doe"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                    />
+        <div className="auth-container" style={{
+            display: "flex", justifyContent: "center", alignItems: "center",
+            height: "100vh", background: "#f8fafc"
+        }}>
+            <div className="auth-card" style={{
+                width: "100%", maxWidth: "450px", padding: "40px",
+                borderRadius: "16px", backgroundColor: "white", boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)"
+            }}>
+                <div style={{ textAlign: "center", marginBottom: "30px" }}>
+                    <h1 style={{ fontSize: "28px", color: "#1e293b" }}>Yeni Hesap Oluştur</h1>
+                    <p style={{ color: "#64748b" }}>Kütüphane topluluğumuza katılın</p>
                 </div>
 
-                <div className="auth-field">
-                    <label>Email Address</label>
-                    <input
-                        type="email"
-                        placeholder="john@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
+                <form onSubmit={handleRegister}>
+                    <label style={{ display: "block", marginBottom: "5px", fontSize: "13px", fontWeight: "600" }}>Ad Soyad</label>
+                    <input style={inputStyle} placeholder="Enes Tokat" required value={name} onChange={e => setName(e.target.value)} />
 
-                <div className="auth-field">
-                    <label>Password</label>
-                    <input
-                        type="password"
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
+                    <label style={{ display: "block", marginBottom: "5px", fontSize: "13px", fontWeight: "600" }}>E-posta</label>
+                    <input style={inputStyle} type="email" placeholder="ornek@mail.com" required value={email} onChange={e => setEmail(e.target.value)} />
 
-                <button className="auth-btn" type="submit">
-                    Sign Up
-                </button>
+                    <label style={{ display: "block", marginBottom: "5px", fontSize: "13px", fontWeight: "600" }}>Şifre</label>
+                    <input style={inputStyle} type="password" placeholder="••••••••" required value={password} onChange={e => setPassword(e.target.value)} />
 
-                <div className="auth-link">
-                    Already have an account? <Link to="/login">Sign In</Link>
+                    <button type="submit" style={buttonStyle}>Kaydı Tamamla</button>
+                </form>
+
+                <div style={{ marginTop: "20px", textAlign: "center", fontSize: "14px" }}>
+                    Zaten üye misiniz? <Link to="/login" style={{ color: "#10b981", fontWeight: "600" }}>Giriş Yapın</Link>
                 </div>
-            </form>
+            </div>
         </div>
     );
 }
-
-export default Register;

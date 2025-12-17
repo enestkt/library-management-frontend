@@ -1,118 +1,117 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
 import { loginRequest } from "../api/api";
+import { useNavigate, Link } from "react-router-dom";
 import "../styles/auth.css";
 
-function Login() {
-    const navigate = useNavigate();
+export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(false);
+    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        setError("");
-        setLoading(true);
-
         try {
             const res = await loginRequest(email, password);
-
-            // ⭐ KRİTİK NOKTA: Token, User ID ve Role bilgilerini saklıyoruz
             localStorage.setItem("token", res.data.token);
-            localStorage.setItem("userId", res.data.userId);
-            localStorage.setItem("role", res.data.role); // "ADMIN" veya "USER"
-
+            localStorage.setItem("user", JSON.stringify(res.data.user));
             navigate("/dashboard");
         } catch (err) {
-            console.error(err);
-            setError("Giriş başarısız. Lütfen bilgilerinizi kontrol edin.");
-        } finally {
-            setLoading(false);
+            const errorMsg = err.response?.data?.message || "Giriş başarısız!";
+            alert("⚠️ Hata: " + errorMsg);
         }
     };
 
+    const inputStyle = {
+        width: "100%",
+        padding: "12px",
+        marginBottom: "15px",
+        borderRadius: "8px",
+        border: "1px solid #cbd5e1",
+        fontSize: "14px",
+        outline: "none",
+        transition: "0.2s"
+    };
+
+    const buttonStyle = {
+        width: "100%",
+        padding: "12px",
+        borderRadius: "8px",
+        border: "none",
+        backgroundColor: "#3b82f6",
+        color: "white",
+        fontSize: "16px",
+        fontWeight: "600",
+        cursor: "pointer",
+        transition: "0.3s"
+    };
+
     return (
-        <div className="auth-page">
-            <div className="auth-card">
-                {/* LOGO ALANI */}
-                <div style={{ textAlign: "center", marginBottom: "24px" }}>
-                    <div style={{
-                        width: "64px", height: "64px", background: "#eff6ff", borderRadius: "16px",
-                        display: "inline-flex", alignItems: "center", justifyContent: "center",
-                        fontSize: "32px", boxShadow: "0 4px 6px -1px rgba(59, 130, 246, 0.2)"
-                    }}>
-                        📚
-                    </div>
+        <div className="auth-container" style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+            background: "linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)"
+        }}>
+            <div className="auth-card" style={{
+                width: "100%",
+                maxWidth: "400px",
+                padding: "40px",
+                borderRadius: "16px",
+                backgroundColor: "white",
+                boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)"
+            }}>
+                <div style={{ textAlign: "center", marginBottom: "30px" }}>
+                    <h1 style={{ fontSize: "28px", color: "#1e293b", margin: "0 0 10px 0" }}>Hoş Geldiniz</h1>
+                    <p style={{ color: "#64748b", fontSize: "14px" }}>Lütfen yönetim paneline erişmek için giriş yapın</p>
                 </div>
-
-                {/* BAŞLIKLAR */}
-                <div style={{ textAlign: "center", marginBottom: "32px" }}>
-                    <h2 style={{ fontSize: "24px", fontWeight: "800", color: "#1e293b", margin: "0 0 8px 0" }}>
-                        Welcome Back!
-                    </h2>
-                    <p style={{ margin: 0, color: "#64748b", fontSize: "14px" }}>
-                        Enter your credentials to access your account.
-                    </p>
-                </div>
-
-                {/* HATA MESAJI */}
-                {error && (
-                    <div className="auth-error" style={{ textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-                        <span>⚠️</span> {error}
-                    </div>
-                )}
 
                 <form onSubmit={handleLogin}>
-                    <div className="auth-field">
-                        <label>Email Address</label>
-                        <input
-                            type="email"
-                            placeholder="name@company.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            disabled={loading}
-                        />
+                    <div style={{ marginBottom: "5px" }}>
+                        <label style={{ fontSize: "13px", fontWeight: "600", color: "#475569" }}>E-posta Adresi</label>
                     </div>
+                    <input
+                        type="email"
+                        style={inputStyle}
+                        placeholder="ornek@mail.com"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        onFocus={(e) => e.target.style.borderColor = "#3b82f6"}
+                        onBlur={(e) => e.target.style.borderColor = "#cbd5e1"}
+                    />
 
-                    <div className="auth-field">
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-                            <label style={{ margin: 0 }}>Password</label>
-                            <span style={{ fontSize: "12px", color: "#3b82f6", cursor: "pointer", fontWeight: "500" }}>
-                                Forgot password?
-                            </span>
-                        </div>
-                        <input
-                            type="password"
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            disabled={loading}
-                        />
+                    <div style={{ marginBottom: "5px" }}>
+                        <label style={{ fontSize: "13px", fontWeight: "600", color: "#475569" }}>Şifre</label>
                     </div>
+                    <input
+                        type="password"
+                        style={inputStyle}
+                        placeholder="••••••••"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        onFocus={(e) => e.target.style.borderColor = "#3b82f6"}
+                        onBlur={(e) => e.target.style.borderColor = "#cbd5e1"}
+                    />
 
                     <button
-                        className="auth-btn"
                         type="submit"
-                        disabled={loading}
-                        style={{ opacity: loading ? 0.7 : 1, cursor: loading ? "wait" : "pointer" }}
+                        style={buttonStyle}
+                        onMouseOver={(e) => e.target.style.backgroundColor = "#2563eb"}
+                        onMouseOut={(e) => e.target.style.backgroundColor = "#3b82f6"}
                     >
-                        {loading ? "Signing in..." : "Sign In"}
+                        Giriş Yap
                     </button>
                 </form>
 
-                <div className="auth-link">
-                    Don't have an account? <Link to="/register">Create Account</Link>
-                </div>
-
-                <div style={{ marginTop: "32px", textAlign: "center", fontSize: "12px", color: "#94a3b8" }}>
-                    &copy; 2025 Library Management System
+                <div style={{ marginTop: "25px", textAlign: "center", fontSize: "14px", color: "#64748b" }}>
+                    Hesabınız yok mu?{" "}
+                    <Link to="/register" style={{ color: "#3b82f6", textDecoration: "none", fontWeight: "600" }}>
+                        Hemen Kaydolun
+                    </Link>
                 </div>
             </div>
         </div>
     );
 }
-
-export default Login;
