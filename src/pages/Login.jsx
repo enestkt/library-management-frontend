@@ -17,9 +17,15 @@ function Login() {
 
         try {
             const res = await loginRequest(email, password);
+
+            // ⭐ KRİTİK NOKTA: Token, User ID ve Role bilgilerini saklıyoruz
             localStorage.setItem("token", res.data.token);
+            localStorage.setItem("userId", res.data.userId);
+            localStorage.setItem("role", res.data.role); // "ADMIN" veya "USER"
+
             navigate("/dashboard");
         } catch (err) {
+            console.error(err);
             setError("Giriş başarısız. Lütfen bilgilerinizi kontrol edin.");
         } finally {
             setLoading(false);
@@ -101,7 +107,6 @@ function Login() {
                     Don't have an account? <Link to="/register">Create Account</Link>
                 </div>
 
-                {/* FOOTER NOTU */}
                 <div style={{ marginTop: "32px", textAlign: "center", fontSize: "12px", color: "#94a3b8" }}>
                     &copy; 2025 Library Management System
                 </div>
