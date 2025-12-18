@@ -153,45 +153,44 @@ function Loans() {
                     </tr>
                     </thead>
 
-                    <tbody>
-                    {loans.map(loan => (
-                        <tr key={loan.id} className="border-b">
-                            <td className="px-10 py-7 font-bold">
-                                {loan.user?.name}
-                            </td>
-
-                            <td className="px-10 py-7">
-                                {loan.book?.title}
-                            </td>
-
-                            <td className="px-10 py-7">
-                                {new Date(
-                                    loan.borrowDate || loan.loanDate
-                                ).toLocaleDateString("tr-TR")}
-                            </td>
-
-                            <td className="px-10 py-7">
-                                    <span className={`px-4 py-1 rounded-full text-xs font-black ${
+                    <tbody className="divide-y divide-slate-50">
+                    {loans.length > 0 ? (
+                        loans.map((loan) => (
+                            <tr key={loan.id} className="hover:bg-blue-50/30 transition-colors">
+                                <td className="px-10 py-7">
+                                    {/* DÜZELTİLDİ: loan.userName kullanıldı */}
+                                    <div className="text-slate-900 font-black text-lg">{loan.userName || "İsimsiz Kullanıcı"}</div>
+                                    <div className="text-[10px] text-blue-500 font-black uppercase tracking-tighter">Sistem Kaydı: #{loan.id}</div>
+                                </td>
+                                <td className="px-10 py-7">
+                                    {/* DÜZELTİLDİ: loan.bookTitle kullanıldı */}
+                                    <div className="font-bold text-slate-700 text-base">{loan.bookTitle || "Bilinmeyen Kitap"}</div>
+                                    {/* DÜZELTİLDİ: loan.bookId kullanıldı */}
+                                    <div className="text-[10px] text-slate-400 font-medium">Kitap ID: {loan.bookId}</div>
+                                </td>
+                                <td className="px-10 py-7">
+                                    <div className="text-slate-600 font-bold">{new Date(loan.loanDate).toLocaleDateString('tr-TR')}</div>
+                                    <div className="text-[10px] text-slate-400">Veriliş Tarihi</div>
+                                </td>
+                                <td className="px-10 py-7">
+                                    <div className={`inline-flex px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
                                         loan.status === "BORROWED"
-                                            ? "bg-orange-100 text-orange-700"
-                                            : "bg-emerald-100 text-emerald-700"
+                                            ? "bg-orange-100 text-orange-700 border border-orange-200"
+                                            : "bg-emerald-100 text-emerald-700 border border-emerald-200"
                                     }`}>
-                                        {loan.status === "BORROWED" ? "Ödünçte" : "İade Edildi"}
-                                    </span>
-                            </td>
-
-                            <td className="px-10 py-7 text-right">
-                                {loan.status === "BORROWED" && currentUser?.role === "ADMIN" && (
-                                    <button
-                                        onClick={() => handleReturn(loan.id)}
-                                        className="text-red-600 font-black hover:underline"
-                                    >
-                                        İade Al
-                                    </button>
-                                )}
+                                        {loan.status === "BORROWED" ? "● Ödünçte" : "✓ İade Edildi"}
+                                    </div>
+                                </td>
+                                {/* Aksiyon butonu kısmı aynı kalabilir */}
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="5" className="px-10 py-20 text-center text-slate-400 font-bold uppercase tracking-widest">
+                                Henüz ödünç kaydı bulunmuyor.
                             </td>
                         </tr>
-                    ))}
+                    )}
                     </tbody>
                 </table>
             </div>
