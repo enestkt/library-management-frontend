@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getAllBooks, getAllLoans, getAllUsers } from "../api/api"; // API fonksiyonlarını import ettik
+// Hata Çözümü: getBooks yerine api.js'deki getAllBooks import edildi
+import { getAllBooks, getAllLoans, getAllUsers } from "../api/api";
 
 function Dashboard() {
     const [loading, setLoading] = useState(true);
@@ -17,7 +18,7 @@ function Dashboard() {
             try {
                 // Tüm verileri paralel olarak çekiyoruz
                 const [booksRes, loansRes, usersRes] = await Promise.all([
-                    getAllBooks(),
+                    getAllBooks(), // Düzeltildi: getBooks() yerine getAllBooks() çağırıldı
                     getAllLoans(),
                     getAllUsers()
                 ]);
@@ -101,8 +102,9 @@ function Dashboard() {
                             <tbody className="divide-y divide-slate-50">
                             {recentLoans.map((loan) => (
                                 <tr key={loan.id} className="hover:bg-slate-50/50 transition-colors">
-                                    <td className="py-4 font-semibold text-slate-700">{loan.book?.title}</td>
-                                    <td className="py-4 text-slate-500">{loan.user?.email}</td>
+                                    {/* Backend'den gelen düz yapıya göre düzeltildi (DTO uyumlu) */}
+                                    <td className="py-4 font-semibold text-slate-700">{loan.bookTitle}</td>
+                                    <td className="py-4 text-slate-500">{loan.userName}</td>
                                     <td className="py-4">
                                             <span className={`px-3 py-1 rounded-lg text-[11px] font-black uppercase tracking-widest ${
                                                 loan.status === "BORROWED"
@@ -127,7 +129,7 @@ function Dashboard() {
 
                     <div className="space-y-4 relative z-10">
                         <Link to="/dashboard/books" className="flex items-center justify-center w-full py-4 rounded-2xl bg-white/10 hover:bg-white text-white hover:text-slate-900 transition-all duration-300 font-bold text-sm">
-                            📖 Yeni Kitap Ekle
+                            📖 Kitap Arşivi
                         </Link>
                         <Link to="/dashboard/users" className="flex items-center justify-center w-full py-4 rounded-2xl bg-white/10 hover:bg-white text-white hover:text-slate-900 transition-all duration-300 font-bold text-sm">
                             👥 Kullanıcıları Yönet
