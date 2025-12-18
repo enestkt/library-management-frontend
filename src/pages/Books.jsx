@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { getBooks, deleteBook } from "../api/api"; // Merkezi API dosyasından fonksiyonları alıyoruz
+import { Link, useNavigate } from "react-router-dom";
+import { getBooks, deleteBook } from "../api/api"; //
 
 function Books() {
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     // Sayfa yüklendiğinde kitapları getir
     useEffect(() => {
@@ -34,7 +36,7 @@ function Books() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-64 text-slate-500 font-medium animate-pulse">
+            <div className="flex items-center justify-center h-screen text-slate-500 font-medium animate-pulse">
                 Kitap arşivi yükleniyor...
             </div>
         );
@@ -53,12 +55,16 @@ function Books() {
                     </p>
                 </div>
 
-                <button className="px-6 py-3 rounded-2xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95">
+                {/* YENİ KİTAP EKLE BUTONU - Link olarak güncellendi */}
+                <Link
+                    to="/dashboard/books/add"
+                    className="px-6 py-3 rounded-2xl bg-blue-600 text-white font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95"
+                >
                     ➕ Yeni Kitap Ekle
-                </button>
+                </Link>
             </div>
 
-            {/* BOOKS GRID - Kartlı Görünüm (Eski halinden daha şık) */}
+            {/* BOOKS GRID */}
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {books.length === 0 ? (
                     <div className="col-span-full py-20 text-center bg-white rounded-3xl border-2 border-dashed border-slate-200 text-slate-400 font-medium">
@@ -71,9 +77,14 @@ function Books() {
                             className="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 hover:shadow-xl transition-all group relative overflow-hidden"
                         >
                             <div className="flex gap-5">
-                                {/* Kitap Kapak Alanı (Placeholder) */}
-                                <div className="w-24 h-32 bg-slate-100 rounded-2xl flex items-center justify-center text-4xl group-hover:scale-105 transition-transform duration-300">
-                                    📖
+                                {/* KİTAP GÖRSELİ (Dinamik ve Efektli) */}
+                                <div className="w-24 h-32 bg-slate-100 rounded-2xl flex-shrink-0 overflow-hidden relative group">
+                                    <img
+                                        src={`https://picsum.photos/seed/${book.id}/200/300`}
+                                        alt={book.title}
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                    />
+                                    <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors"></div>
                                 </div>
 
                                 <div className="flex-1 flex flex-col justify-between py-1">
@@ -81,8 +92,9 @@ function Books() {
                                         <h3 className="font-black text-slate-800 text-lg leading-tight line-clamp-2">
                                             {book.title}
                                         </h3>
-                                        <p className="text-slate-500 text-sm font-bold mt-1 uppercase tracking-tight">
-                                            {book.author?.name || "Bilinmeyen Yazar"}
+                                        {/* YAZAR ADI (book.authorName veya book.author.name olarak eşleşir) */}
+                                        <p className="text-slate-500 text-sm font-bold mt-1 uppercase tracking-tight italic">
+                                            {book.authorName || book.author?.name || "Bilinmeyen Yazar"}
                                         </p>
                                     </div>
 
@@ -95,15 +107,18 @@ function Books() {
                                             {book.available ? 'Müsait' : 'Ödünçte'}
                                         </span>
                                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-1 rounded-lg">
-                                            {book.category?.name || "Genel"}
+                                            {book.categoryName || book.category?.name || "Genel"}
                                         </span>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* İşlem Butonları */}
+                            {/* İŞLEM BUTONLARI (Hover durumunda görünür) */}
                             <div className="mt-6 pt-6 border-t border-slate-50 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <button className="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-600 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition">
+                                <button
+                                    onClick={() => navigate(`/dashboard/books/edit/${book.id}`)}
+                                    className="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-600 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition"
+                                >
                                     Düzenle
                                 </button>
                                 <button
