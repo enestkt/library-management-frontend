@@ -5,13 +5,17 @@ import Sidebar from "../components/Sidebar";
 
 function DashboardLayout() {
     return (
-        <div className="layout">
+        <div className="flex min-h-screen bg-slate-100">
+            {/* SIDEBAR */}
             <Sidebar />
 
-            <div className="main">
+            {/* SAĞ TARAF */}
+            <div className="flex flex-col flex-1 min-w-0">
+                {/* NAVBAR */}
                 <Navbar />
 
-                <main className="content">
+                {/* SAYFA İÇERİĞİ */}
+                <main className="flex-1 p-8 overflow-y-auto">
                     <Outlet />
                 </main>
             </div>

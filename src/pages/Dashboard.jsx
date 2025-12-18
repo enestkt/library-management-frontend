@@ -1,232 +1,133 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { getAllBooks } from "../api/bookService";
-import { getAllLoans } from "../api/loanService";
-import "../styles/layout.css";
-import "../styles/dashboard.css"; // Yeni CSS dosyamızı import ettiğinden emin ol
 
-/* ---------- STAT CARD COMPONENT ---------- */
-function StatCard({ title, value, icon, colorClass }) {
-    return (
-        <div className={`card stat-card ${colorClass}`}>
-            <div className="stat-header">
-                <span className="stat-title">{title}</span>
-                <span className="stat-icon">{icon}</span>
-            </div>
-            <div className="stat-value">{value}</div>
-        </div>
-    );
-}
-
-/* ---------- PROGRESS BAR COMPONENT ---------- */
-function ProgressBar({ label, value, total, color }) {
-    const percent = total > 0 ? Math.round((value / total) * 100) : 0;
-    return (
-        <div className="progress-container">
-            <div className="progress-info">
-                <span>{label}</span>
-                <span>{value} / {total} ({percent}%)</span>
-            </div>
-            <div className="progress-bar-bg">
-                <div
-                    className="progress-bar-fill"
-                    style={{ width: `${percent}%`, background: color }}
-                ></div>
-            </div>
-        </div>
-    );
-}
-
-/* ---------- DASHBOARD MAIN ---------- */
-export default function Dashboard() {
-    const [loading, setLoading] = useState(true);
-    const [today, setToday] = useState("");
-
-    const [bookStats, setBookStats] = useState({
-        total: 0,
-        available: 0,
-        borrowed: 0,
+function Dashboard() {
+    const [stats, setStats] = useState({
+        totalBooks: 0,
+        activeLoans: 0,
+        availableBooks: 0,
+        totalUsers: 0,
     });
 
-    const [loanStats, setLoanStats] = useState({
-        total: 0,
-        active: 0,
-        recent: [],
-    });
-
+    // örnek – senin API call’un varsa burada kalır
     useEffect(() => {
-        const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        setToday(new Date().toLocaleDateString('tr-TR', dateOptions));
-
-        const loadDashboard = async () => {
-            try {
-                const [bookRes, loanRes] = await Promise.all([getAllBooks(), getAllLoans()]);
-
-                const books = bookRes.data || [];
-                const loans = loanRes.data || [];
-
-                const availableBooks = books.filter(b => b.available).length;
-                const activeLoans = loans.filter(l => l.status === "BORROWED");
-
-                const recentLoans = [...loans]
-                    .sort((a, b) => new Date(b.loanDate) - new Date(a.loanDate))
-                    .slice(0, 5);
-
-                setBookStats({
-                    total: books.length,
-                    available: availableBooks,
-                    borrowed: books.length - availableBooks,
-                });
-
-                setLoanStats({
-                    total: loans.length,
-                    active: activeLoans.length,
-                    recent: recentLoans,
-                });
-
-            } catch (err) {
-                console.error("Dashboard yüklenirken hata:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadDashboard();
+        // fetchStats()
     }, []);
 
-    if (loading) {
-        return (
-            <div className="loading-screen">
-                <div className="loader-text">Dashboard verileri yükleniyor...</div>
-            </div>
-        );
-    }
-
     return (
-        <div className="page">
+        <div className="space-y-8">
             {/* HEADER */}
-            <div className="page-header">
-                <div>
-                    <h1>Kontrol Paneli</h1>
-                    <p>Tekrar hoş geldiniz, Yönetici 👋</p>
-                </div>
-                <div className="date-display">
-                    {today}
-                </div>
+            <div>
+                <h1 className="text-3xl font-extrabold text-slate-900">
+                    Dashboard
+                </h1>
+                <p className="text-slate-500 mt-1">
+                    Kütüphane genel durumu
+                </p>
             </div>
 
-            {/* STAT KARTLARI */}
-            <div className="grid-stats">
+            {/* STAT CARDS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
                     title="Toplam Kitap"
-                    value={bookStats.total}
+                    value={stats.totalBooks}
+                    color="from-indigo-500 to-indigo-600"
                     icon="📚"
-                    colorClass="card-blue"
                 />
                 <StatCard
-                    title="Aktif Ödünçler"
-                    value={loanStats.active}
-                    icon="⏳"
-                    colorClass="card-orange"
+                    title="Aktif Ödünç"
+                    value={stats.activeLoans}
+                    color="from-orange-500 to-orange-600"
+                    icon="🔄"
                 />
                 <StatCard
-                    title="Müsait Kitaplar"
-                    value={bookStats.available}
+                    title="Uygun Kitap"
+                    value={stats.availableBooks}
+                    color="from-green-500 to-green-600"
                     icon="✅"
-                    colorClass="card-green"
                 />
                 <StatCard
                     title="Toplam Kullanıcı"
-                    value={loanStats.total}
+                    value={stats.totalUsers}
+                    color="from-purple-500 to-purple-600"
                     icon="👥"
-                    colorClass="card-purple"
                 />
             </div>
 
-            {/* ANA ALAN */}
-            <div className="dashboard-main-grid">
+            {/* MAIN GRID */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* RECENT ACTIVITY */}
+                <div className="lg:col-span-2 bg-white rounded-2xl shadow p-6">
+                    <h3 className="text-lg font-bold mb-4">
+                        Son İşlemler
+                    </h3>
 
-                {/* SON İŞLEMLER */}
-                <div className="card recent-activity">
-                    <div className="card-header">
-                        <h3>Son İşlemler</h3>
-                        <Link to="/dashboard/loans" className="view-all">
-                            Tümünü Gör →
-                        </Link>
-                    </div>
-
-                    <div className="table-wrap">
-                        <table className="table">
-                            <thead>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead className="text-slate-500 border-b">
                             <tr>
-                                <th>Kitap Adı</th>
-                                <th>Kullanıcı</th>
-                                <th>Tarih</th>
-                                <th>Durum</th>
+                                <th className="text-left py-3">Kitap</th>
+                                <th className="text-left py-3">Kullanıcı</th>
+                                <th className="text-left py-3">Durum</th>
                             </tr>
                             </thead>
                             <tbody>
-                            {loanStats.recent.length === 0 ? (
-                                <tr>
-                                    <td colSpan="4" className="empty-row">
-                                        Herhangi bir işlem bulunamadı.
-                                    </td>
-                                </tr>
-                            ) : (
-                                loanStats.recent.map(l => (
-                                    <tr key={l.id}>
-                                        <td className="td-title">{l.book?.title || "Bilinmeyen Kitap"}</td>
-                                        <td>{l.user?.email || "Bilinmeyen Kullanıcı"}</td>
-                                        <td className="td-date">{l.loanDate}</td>
-                                        <td>
-                                            <span className={`badge ${l.status === "BORROWED" ? "warn" : "ok"}`}>
-                                                {l.status === "BORROWED" ? "Ödünçte" : "İade Edildi"}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                ))
-                            )}
+                            <tr className="border-b last:border-0 hover:bg-slate-50 transition">
+                                <td className="py-3 font-medium">
+                                    Örnek Kitap
+                                </td>
+                                <td className="py-3">Ali Veli</td>
+                                <td className="py-3">
+                                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                                            Teslim
+                                        </span>
+                                </td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                {/* SAĞ PANEL */}
-                <div className="side-panels">
+                {/* QUICK ACTIONS */}
+                <div className="bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-2xl p-6 shadow">
+                    <h3 className="text-lg font-extrabold mb-2">
+                        Hızlı İşlemler
+                    </h3>
+                    <p className="text-sm text-slate-300 mb-6">
+                        Kütüphaneyi hızlıca yönet
+                    </p>
 
-                    <div className="card status-card">
-                        <h3>Kütüphane Durumu</h3>
-                        <div className="progress-section">
-                            <ProgressBar
-                                label="Müsait Kitaplar"
-                                value={bookStats.available}
-                                total={bookStats.total}
-                                color="#22c55e"
-                            />
-                            <ProgressBar
-                                label="Ödünçteki Kitaplar"
-                                value={bookStats.borrowed}
-                                total={bookStats.total}
-                                color="#f97316"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="card quick-actions-dark">
-                        <h3>Hızlı İşlemler</h3>
-                        <p>Kütüphanenizi hızlı ve kolay yönetin.</p>
-
-                        <div className="action-buttons">
-                            <Link to="/dashboard/books" className="btn-glass">
-                                + Yeni Kitap Ekle
-                            </Link>
-                            <Link to="/dashboard/users" className="btn-glass">
-                                Kullanıcıları Yönet
-                            </Link>
-                        </div>
+                    <div className="space-y-3">
+                        <button className="w-full py-3 rounded-xl bg-white/10 hover:bg-white/20 transition font-semibold">
+                            📖 Yeni Kitap Ekle
+                        </button>
+                        <button className="w-full py-3 rounded-xl bg-white/10 hover:bg-white/20 transition font-semibold">
+                            👥 Kullanıcıları Yönet
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
     );
 }
+
+/* STAT CARD COMPONENT */
+function StatCard({ title, value, color, icon }) {
+    return (
+        <div
+            className={`bg-gradient-to-br ${color} text-white rounded-2xl p-6 shadow flex flex-col`}
+        >
+            <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-semibold opacity-90">
+                    {title}
+                </span>
+                <span className="text-2xl">{icon}</span>
+            </div>
+
+            <div className="text-4xl font-extrabold">
+                {value}
+            </div>
+        </div>
+    );
+}
+
+export default Dashboard;

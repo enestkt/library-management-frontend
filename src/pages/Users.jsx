@@ -1,147 +1,81 @@
 import { useEffect, useState } from "react";
-import { getAllUsers } from "../api/userService";
-import { registerRequest } from "../api/api";
-import "../styles/pages.css";
 
-export default function Users() {
+function Users() {
     const [users, setUsers] = useState([]);
-    const [showAddForm, setShowAddForm] = useState(false);
-    const [msg, setMsg] = useState({ text: "", type: "" });
-    const [newUser, setNewUser] = useState({ name: "", email: "", password: "" });
-    const [loading, setLoading] = useState(false);
-
-    // Kullanıcı listesini getir
-    const fetchUsers = async () => {
-        setLoading(true);
-        try {
-            const res = await getAllUsers();
-            setUsers(res.data || []);
-        } catch (err) {
-            console.error("Kullanıcılar yüklenemedi", err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     useEffect(() => {
-        fetchUsers();
+        // fetchUsers();
     }, []);
 
-    // Yeni kullanıcı ekleme (Admin Paneli üzerinden Register)
-    const handleAddUser = async (e) => {
-        e.preventDefault();
-        try {
-            // Backend'deki register endpoint'ini kullanıyoruz
-            await registerRequest(newUser.name, newUser.email, newUser.newUserPassword || newUser.password);
-            setMsg({ text: "✅ Yeni kullanıcı başarıyla kütüphaneye kaydedildi!", type: "success" });
-
-            // Formu temizle ve kapat
-            setNewUser({ name: "", email: "", password: "" });
-            setShowAddForm(false);
-
-            // Listeyi tazele
-            fetchUsers();
-
-            // 3 saniye sonra mesajı kaldır
-            setTimeout(() => setMsg({ text: "", type: "" }), 3000);
-        } catch (err) {
-            setMsg({ text: "❌ Hata: Kullanıcı oluşturulamadı. E-posta zaten kullanımda olabilir.", type: "error" });
-        }
-    };
-
     return (
-        <div className="page">
-            <div className="page-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
+        <div className="space-y-8">
+            {/* HEADER */}
+            <div className="flex items-end justify-between">
                 <div>
-                    <h1>Sistem Kullanıcıları</h1>
-                    <p>Kütüphane üyelerini görüntüleyin ve yeni üye kaydı yapın.</p>
+                    <h1 className="text-3xl font-extrabold text-slate-900">
+                        Users
+                    </h1>
+                    <p className="text-slate-500 mt-1">
+                        Kayıtlı tüm kullanıcılar
+                    </p>
                 </div>
-                <button
-                    onClick={() => setShowAddForm(!showAddForm)}
-                    className={showAddForm ? "btn-dark" : "btn-primary"}
-                    style={{ padding: "10px 20px", borderRadius: "8px", fontWeight: "600" }}
-                >
-                    {showAddForm ? "✖ Vazgeç" : "+ Yeni Üye Ekle"}
+
+                <button className="px-5 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition">
+                    ➕ Yeni Kullanıcı
                 </button>
             </div>
 
-            {/* Bildirim Mesajı */}
-            {msg.text && (
-                <div style={{
-                    padding: "15px", borderRadius: "10px", marginBottom: "20px",
-                    backgroundColor: msg.type === "success" ? "#dcfce7" : "#fee2e2",
-                    color: msg.type === "success" ? "#166534" : "#991b1b",
-                    textAlign: "center", fontWeight: "600", border: "1px solid"
-                }}>
-                    {msg.text}
-                </div>
-            )}
-
-            {/* --- YENİ KULLANICI EKLEME FORMU --- */}
-            {showAddForm && (
-                <div className="card" style={{ marginBottom: "30px", border: "2px solid #3b82f6", padding: "20px" }}>
-                    <h3 style={{ marginBottom: "20px" }}>👤 Yeni Üye Tanımlama</h3>
-                    <form onSubmit={handleAddUser} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "15px" }}>
-                        <div className="form-group">
-                            <label style={{ display: "block", marginBottom: "5px", fontSize: "13px", fontWeight: "600" }}>Ad Soyad</label>
-                            <input
-                                className="form-input" required placeholder="Örn: Ahmet Yılmaz"
-                                value={newUser.name} onChange={e => setNewUser({...newUser, name: e.target.value})}
-                                style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ddd" }}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label style={{ display: "block", marginBottom: "5px", fontSize: "13px", fontWeight: "600" }}>E-posta Adresi</label>
-                            <input
-                                className="form-input" type="email" required placeholder="ornek@mail.com"
-                                value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})}
-                                style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ddd" }}
-                            />
-                        </div>
-                        <div className="form-group">
-                            <label style={{ display: "block", marginBottom: "5px", fontSize: "13px", fontWeight: "600" }}>Şifre</label>
-                            <input
-                                className="form-input" type="password" required placeholder="******"
-                                value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})}
-                                style={{ width: "100%", padding: "10px", borderRadius: "6px", border: "1px solid #ddd" }}
-                            />
-                        </div>
-                        <button type="submit" className="btn-primary" style={{ gridColumn: "span 3", padding: "12px", marginTop: "10px", fontWeight: "bold" }}>
-                            Üyeliği Onayla ve Kaydet
-                        </button>
-                    </form>
-                </div>
-            )}
-
-            {/* --- KULLANICI LİSTESİ TABLOSU --- */}
-            <div className="card" style={{ padding: "0" }}>
-                <div className="table-wrap">
-                    <table className="table" style={{ margin: "0" }}>
-                        <thead>
+            {/* TABLE */}
+            <div className="bg-white rounded-2xl shadow p-6">
+                <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                        <thead className="border-b text-slate-500">
                         <tr>
-                            <th style={{ padding: "15px" }}>ID</th>
-                            <th>Ad Soyad</th>
-                            <th>E-posta</th>
-                            <th>Rol</th>
-                            <th>Durum</th>
+                            <th className="text-left py-3">Ad Soyad</th>
+                            <th className="text-left py-3">E-posta</th>
+                            <th className="text-left py-3">Rol</th>
+                            <th className="text-right py-3">İşlemler</th>
                         </tr>
                         </thead>
+
                         <tbody>
-                        {loading ? (
-                            <tr><td colSpan="5" style={{ textAlign: "center", padding: "30px" }}>Veriler yükleniyor...</td></tr>
-                        ) : users.length === 0 ? (
-                            <tr><td colSpan="5" style={{ textAlign: "center", padding: "30px" }}>Henüz kayıtlı kullanıcı bulunmuyor.</td></tr>
+                        {users.length === 0 ? (
+                            <tr>
+                                <td
+                                    colSpan="4"
+                                    className="py-10 text-center text-slate-400"
+                                >
+                                    Henüz kullanıcı yok
+                                </td>
+                            </tr>
                         ) : (
-                            users.map((u) => (
-                                <tr key={u.id}>
-                                    <td style={{ padding: "15px", color: "#64748b", fontWeight: "bold" }}>#{u.id}</td>
-                                    <td style={{ fontWeight: "600", color: "#1e293b" }}>{u.name}</td>
-                                    <td style={{ color: "#64748b" }}>{u.email}</td>
-                                    <td>
-                                        <span className="badge ok" style={{ fontSize: "11px" }}>USER</span>
+                            users.map((user) => (
+                                <tr
+                                    key={user.id}
+                                    className="border-b last:border-0 hover:bg-slate-50 transition"
+                                >
+                                    <td className="py-3 font-medium">
+                                        {user.name}
                                     </td>
-                                    <td>
-                                        <span style={{ color: "#10b981", fontSize: "12px", fontWeight: "600" }}>● Aktif</span>
+                                    <td className="py-3">
+                                        {user.email}
+                                    </td>
+                                    <td className="py-3">
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                                user.role === "ADMIN"
+                                                    ? "bg-purple-100 text-purple-700"
+                                                    : "bg-slate-100 text-slate-700"
+                                            }`}>
+                                                {user.role}
+                                            </span>
+                                    </td>
+                                    <td className="py-3 text-right space-x-2">
+                                        <button className="px-3 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 transition font-semibold">
+                                            Düzenle
+                                        </button>
+                                        <button className="px-3 py-1 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 transition font-semibold">
+                                            Sil
+                                        </button>
                                     </td>
                                 </tr>
                             ))
@@ -153,3 +87,5 @@ export default function Users() {
         </div>
     );
 }
+
+export default Users;
