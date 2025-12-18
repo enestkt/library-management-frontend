@@ -7,6 +7,7 @@ import Users from "./pages/Users";
 import Loans from "./pages/Loans";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardLayout from "./layout/DashboardLayout";
+import Profile from "./pages/Profile";
 
 function App() {
     return (
@@ -22,6 +23,7 @@ function App() {
                     <Route path="books" element={<Books />} />
                     <Route path="users" element={<Users />} />
                     <Route path="loans" element={<Loans />} />
+                    <Route path="profile" element={<Profile />} />
                 </Route>
             </Route>
         </Routes>
