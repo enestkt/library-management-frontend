@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getBooks, getAllLoans, getAllUsers } from "../api/api"; // API fonksiyonlarını import ettik
+import { getAllBooks, getAllLoans, getAllUsers } from "../api/api"; // API fonksiyonlarını import ettik
 
 function Dashboard() {
     const [loading, setLoading] = useState(true);
@@ -17,7 +17,7 @@ function Dashboard() {
             try {
                 // Tüm verileri paralel olarak çekiyoruz
                 const [booksRes, loansRes, usersRes] = await Promise.all([
-                    getBooks(),
+                    getAllBooks(),
                     getAllLoans(),
                     getAllUsers()
                 ]);

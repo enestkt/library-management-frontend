@@ -4,7 +4,7 @@ import {
     returnBook,
     borrowBook,
     getAllUsers,
-    getBooks
+    getAllBooks
 } from "../api/api";
 import toast from "react-hot-toast";
 
@@ -27,7 +27,7 @@ function Loans() {
             const [loansRes, usersRes, booksRes] = await Promise.all([
                 getAllLoans(),
                 getAllUsers(),
-                getBooks()
+                getAllBooks()
             ]);
 
             setLoans(loansRes.data || []);
