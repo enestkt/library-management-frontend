@@ -7,7 +7,17 @@ function Profile() {
     const [loading, setLoading] = useState(true);
 
     // LocalStorage'dan giriş yapan kullanıcının bilgilerini alıyoruz
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    let user = null;
+
+    try {
+        const rawUser = localStorage.getItem("user");
+        user = rawUser && rawUser !== "undefined"
+            ? JSON.parse(rawUser)
+            : null;
+    } catch (e) {
+        user = null;
+    }
+
 
     useEffect(() => {
         fetchMyLoans();
