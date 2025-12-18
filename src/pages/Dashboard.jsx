@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-// Hata Çözümü: getBooks yerine api.js'deki getAllBooks import edildi
 import { getAllBooks, getAllLoans, getAllUsers } from "../api/api";
 
 function Dashboard() {
@@ -18,7 +17,7 @@ function Dashboard() {
             try {
                 // Tüm verileri paralel olarak çekiyoruz
                 const [booksRes, loansRes, usersRes] = await Promise.all([
-                    getAllBooks(), // Düzeltildi: getBooks() yerine getAllBooks() çağırıldı
+                    getAllBooks(),
                     getAllLoans(),
                     getAllUsers()
                 ]);
