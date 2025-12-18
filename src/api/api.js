@@ -1,17 +1,10 @@
 import axios from "axios";
 
-/**
- * BASE CONFIG
- * * process.env.REACT_APP_API_URL:
- * - Lokaldeyken: undefined (veya .env dosyasında varsa o) -> "http://localhost:8080/api" kullanılır.
- * - Canlıda (Vercel): Vercel ayarlarında girdiğimiz link kullanılır.
- */
 const api = axios.create({
     baseURL: process.env.REACT_APP_API_URL || "http://localhost:8080/api",
 });
 
-// ===== 1. TOKEN INTERCEPTOR (İstek Atarken) =====
-// Her isteğe otomatik olarak localStorage'daki token'ı ekler.
+// TOKEN INTERCEPTOR
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -20,79 +13,52 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// ===== 2. ERROR INTERCEPTOR (Cevap Gelirken) =====
-// Backend'den hata dönerse (400, 401, 500 vs.) yakalar ve ekrana basar.
+// ERROR INTERCEPTOR
 api.interceptors.response.use(
-    (response) => response, // Başarılıysa dokunma, devam et.
+    (response) => response,
     (error) => {
-        // Backend'den gönderdiğimiz özel JSON mesajını yakalamaya çalışıyoruz
         const errorMessage =
             error.response?.data?.message ||
             error.response?.data?.details ||
             error.response?.data?.error ||
             "Beklenmedik bir hata oluştu!";
 
-        // Ekrana 'Alert' kutusu olarak çıkar (Kullanıcı hatayı görsün)
-        // Not: 401 (Yetkisiz) hatasında alert çıkarmak yerine login'e de atabilirsin ama şimdilik alert kalsın.
         if (error.response && error.response.status !== 401) {
             alert("⚠️ HATA: " + errorMessage);
         }
-
         return Promise.reject(error);
     }
 );
 
-/* =======================
-        AUTH
-======================= */
+/* AUTH İŞLEMLERİ */
+export const loginRequest = (email, password) => api.post("/auth/login", { email, password });
+export const registerRequest = (name, email, password) => api.post("/auth/register", { name, email, password });
 
-// LOGIN
-export const loginRequest = (email, password) => {
-    return api.post("/auth/login", { email, password });
-};
+/* KULLANICI İŞLEMLERİ */
+export const getAllUsers = () => api.get("/users");
+export const deleteUser = (id) => api.delete(`/users/${id}`);
 
-// REGISTER
-export const registerRequest = (name, email, password) => {
-    return api.post("/auth/register", {
-        name,
-        email,
-        password,
+/* KİTAP İŞLEMLERİ */
+// Loans.jsx içindeki kullanıma göre getAllBooks ismini sabitledik
+export const getAllBooks = () => api.get("/books");
+export const getBookById = (id) => api.get(`/books/${id}`);
+export const deleteBook = (id) => api.delete(`/books/${id}`);
+
+/* ÖDÜNÇ İŞLEMLERİ (LOAN) */
+
+// ⭐ DÜZELTİLEN KRİTİK KISIM:
+// Backend @RequestBody LoanRequestDto beklediği için veriyi JSON objesi olarak gönderiyoruz.
+export const borrowBook = (bookId, userId) => {
+    return api.post("/loans/borrow", {
+        bookId: Number(bookId),
+        userId: Number(userId)
     });
 };
 
-/* =======================
-        BOOK
-======================= */
+// İade işlemi backend'de @PathVariable olduğu için URL içinden gönderilmeye devam ediyor.
+export const returnBook = (loanId) => api.post(`/loans/return/${loanId}`);
 
-export const getBooks = () => api.get("/books");
-
-// ID'ye göre kitap getir (Detay sayfası için gerekebilir)
-export const getBookById = (id) => api.get(`/books/${id}`);
-
-export const deleteBook = (id) =>
-    api.delete(`/books/${id}`);
-
-/* =======================
-        LOAN
-======================= */
-
-export const borrowBook = (bookId, userId) =>
-    api.post(`/loans/borrow/${bookId}/${userId}`);
-
-export const returnBook = (loanId) =>
-    api.post(`/loans/return/${loanId}`);
-
-export const getUserLoans = (userId) =>
-    api.get(`/loans/user/${userId}`);
-
-/* =======================
-        USERS / DASHBOARD
-======================= */
-
-export const getAllUsers = () =>
-    api.get("/users");
-
-export const getAllLoans = () =>
-    api.get("/loans");
+export const getAllLoans = () => api.get("/loans");
+export const getUserLoans = (userId) => api.get(`/loans/user/${userId}`);
 
 export default api;

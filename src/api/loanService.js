@@ -1,7 +1,16 @@
-import api from "./api";
+import api from "./api"; // Kendi axios instance'ın
 
-// KİTAP ÖDÜNÇ AL (Düzeltilen Kısım)
-// Backend @RequestBody istediği için veriyi {} içinde gönderiyoruz.
+// KULLANICI LİSTESİ
+export const getAllUsers = () => api.get("/users");
+
+// KİTAP LİSTESİ
+export const getAllBooks = () => api.get("/books");
+
+// ÖDÜNÇ LİSTESİ (TÜMÜ)
+export const getAllLoans = () => api.get("/loans");
+
+// KİTAP ÖDÜNÇ AL
+// Backend @RequestBody (JSON) beklediği için veriyi nesne olarak gönderiyoruz
 export const borrowBook = (bookId, userId) => {
     return api.post("/loans/borrow", {
         bookId: bookId,
@@ -9,24 +18,12 @@ export const borrowBook = (bookId, userId) => {
     });
 };
 
-// KİTAP İADE ET (Bu kısım zaten doğruydu, path variable kullanıyor)
+// KİTAP İADE ET
 export const returnBook = (loanId) => {
     return api.post(`/loans/return/${loanId}`);
 };
 
-// KULLANICI GEÇMİŞİ
+// KULLANICI ÖDÜNÇ GEÇMİŞİ
 export const getUserLoans = (userId) => {
     return api.get(`/loans/user/${userId}`);
 };
-
-// TÜM KULLANICILAR
-export const getAllUsers = () =>
-    api.get("/users");
-
-// TÜM KİTAPLAR
-export const getAllBooks = () =>
-    api.get("/books");
-
-// TÜM ÖDÜNÇLER
-export const getAllLoans = () =>
-    api.get("/loans");
