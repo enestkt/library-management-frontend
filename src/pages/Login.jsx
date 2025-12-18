@@ -16,32 +16,31 @@ function Login() {
         try {
             const res = await loginRequest(email, password);
 
-            const token = res.data.token;
-            const backendUser = res.data.user;
+            // Backend'den gelen veriyi direkt alıyoruz (res.data.user yok, res.data var)
+            const data = res.data;
 
-            if (!token || !backendUser) {
-                throw new Error("Geçersiz giriş cevabı");
+            if (!data.token) {
+                throw new Error("Giriş cevabı hatalı: Token bulunamadı.");
             }
 
-            // 🔥 KRİTİK DÜZELTME BURASI
+            // Backend'deki alan adlarıyla (userId, name, email, role) eşleştirme
             const user = {
-                id: backendUser.id,
-                name: backendUser.name,
-                email: backendUser.email,
-                role: backendUser.role || "ADMIN" // role yoksa ADMIN varsay
+                id: data.userId, // Backend'de 'userId' olarak geliyor
+                name: data.name,
+                email: data.email,
+                role: data.role
             };
 
-            localStorage.setItem("token", token);
+            localStorage.setItem("token", data.token);
             localStorage.setItem("user", JSON.stringify(user));
 
             toast.success("Giriş başarılı");
+
+            // Yönlendirme
             navigate("/dashboard");
         } catch (err) {
-            toast.error(
-                err.response?.data?.message ||
-                err.message ||
-                "Giriş başarısız"
-            );
+            console.error("Giriş hatası:", err);
+            toast.error(err.response?.data?.message || err.message || "Giriş başarısız");
         } finally {
             setLoading(false);
         }
