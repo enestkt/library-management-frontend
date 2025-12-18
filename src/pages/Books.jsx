@@ -59,12 +59,12 @@ function Books() {
     };
 
     const handleSelfBorrow = async (bookId) => {
-        if (!user.userId) {
+        if (!currentUser?.userId) {
             toast.error("Ödünç almak için giriş yapmalısınız");
             return;
         }
         try {
-            await borrowBook(bookId, user.userId);
+            await borrowBook(bookId, currentUser.userId);
             toast.success("Kitap üzerinize tanımlandı!");
             fetchInitialData();
         } catch (err) {
@@ -139,7 +139,7 @@ function Books() {
                     <h1 className="text-4xl font-black text-slate-900 tracking-tight">Kitap Arşivi</h1>
                     <p className="text-slate-500 mt-2 font-medium italic">Kütüphane koleksiyonunu keşfedin.</p>
                 </div>
-                {user?.role === "ADMIN" && (
+                {currentUser?.role === "ADMIN" && (
                     <button
                         onClick={() => openModal()} // Sayfaya gitmek yerine MODAL AÇAR
                         className="px-8 py-4 rounded-[1.5rem] bg-blue-600 text-white font-black uppercase tracking-widest text-xs hover:bg-blue-700 shadow-xl transition-all active:scale-95"
@@ -206,7 +206,7 @@ function Books() {
                                 </button>
                             )}
 
-                            {user?.role === "ADMIN" && (
+                            {currentUser?.role === "ADMIN" && (
                                 <>
                                     <button onClick={() => openModal(book.id)} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-4 rounded-2xl flex items-center justify-center transition-all">✏️</button>
                                     <button onClick={() => deleteBook(book.id)} className="flex-1 bg-red-50 hover:bg-red-500 hover:text-white text-red-500 py-4 rounded-2xl flex items-center justify-center transition-all">🗑️</button>
