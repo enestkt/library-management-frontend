@@ -15,7 +15,17 @@ function Loans() {
     const [loading, setLoading] = useState(true);
 
     const [borrowForm, setBorrowForm] = useState({ userId: "", bookId: "" });
-    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+    let user = null;
+
+    try {
+        const rawUser = localStorage.getItem("user");
+        user = rawUser && rawUser !== "undefined"
+            ? JSON.parse(rawUser)
+            : null;
+    } catch (e) {
+        user = null;
+    }
+
 
     useEffect(() => {
         loadInitialData();

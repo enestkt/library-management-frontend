@@ -7,7 +7,17 @@ function Users() {
     const [loading, setLoading] = useState(true);
 
     // Giriş yapan kullanıcının rolünü kontrol etmek için
-    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+    let user = null;
+
+    try {
+        const rawUser = localStorage.getItem("user");
+        user = rawUser && rawUser !== "undefined"
+            ? JSON.parse(rawUser)
+            : null;
+    } catch (e) {
+        user = null;
+    }
+
 
     useEffect(() => {
         loadUsers();
