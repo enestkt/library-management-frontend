@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { getAllBooks, deleteBook, getBookById, borrowBook, getAllUsers } from "../api/api";
-import api from "../api/api"; // PUT/POST işlemleri için direkt axios instance
+import { getAllBooks, deleteBook, getBookById, borrowBook } from "../api/api";
+import api from "../api/api";
 import toast from "react-hot-toast";
 
 function Books() {
     const [books, setBooks] = useState([]);
-    const [authors, setAuthors] = useState([]); // Yazar listesi
-    const [categoriesList, setCategoriesList] = useState([]); // Kategori listesi
+    const [authors, setAuthors] = useState([]);
+    const [categoriesList, setCategoriesList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingBookId, setEditingBookId] = useState(null);
@@ -15,7 +15,7 @@ function Books() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("Hepsi");
 
-    // Form State (Admin için) - ISBN eklendi, ID'ler select için boş bırakıldı
+    // Form State
     const [formData, setFormData] = useState({
         isbn: "",
         title: "",
@@ -34,10 +34,9 @@ function Books() {
     const fetchInitialData = async () => {
         setLoading(true);
         try {
-            // Kitapları, Yazarları ve Kategorileri aynı anda çekiyoruz
             const [booksRes, authorsRes, catsRes] = await Promise.all([
                 getAllBooks(),
-                api.get("/authors"), // api.js'de tanımlı değilse direkt buradan çekiyoruz
+                api.get("/authors"),
                 api.get("/categories")
             ]);
             setBooks(booksRes.data || []);
@@ -51,7 +50,7 @@ function Books() {
     };
 
     const handleSelfBorrow = async (bookId) => {
-        if (!user.userId) { // Sizin auth response'unuzda userId olarak dönüyor
+        if (!user.userId) {
             toast.error("Ödünç almak için giriş yapmalısınız");
             return;
         }
@@ -63,15 +62,6 @@ function Books() {
             toast.error(err.response?.data?.message || "Ödünç alma başarısız");
         }
     };
-
-    const filteredBooks = books.filter(book => {
-        const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase());
-        const categoryName = book.categoryName || "Genel";
-        const matchesCategory = selectedCategory === "Hepsi" || categoryName === selectedCategory;
-        return matchesSearch && matchesCategory;
-    });
-
-    const categoriesMenu = ["Hepsi", ...new Set(books.map(b => b.categoryName || "Genel"))];
 
     const openModal = async (bookId = null) => {
         if (bookId) {
@@ -100,7 +90,6 @@ function Books() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // ID'lerin sayı olduğundan emin oluyoruz
         const payload = {
             ...formData,
             authorId: Number(formData.authorId),
@@ -122,17 +111,14 @@ function Books() {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Bu kitabı silmek istediğinize emin misiniz?")) {
-            try {
-                await deleteBook(id);
-                toast.success("Kitap silindi");
-                fetchInitialData();
-            } catch (err) {
-                toast.error("Silme işlemi başarısız!");
-            }
-        }
-    };
+    const filteredBooks = books.filter(book => {
+        const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase());
+        const categoryName = book.categoryName || "Genel";
+        const matchesCategory = selectedCategory === "Hepsi" || categoryName === selectedCategory;
+        return matchesSearch && matchesCategory;
+    });
+
+    const categoriesMenu = ["Hepsi", ...new Set(books.map(b => b.categoryName || "Genel"))];
 
     if (loading) return <div className="flex items-center justify-center h-screen font-black text-slate-400 animate-pulse uppercase tracking-widest">Yükleniyor...</div>;
 
@@ -146,7 +132,7 @@ function Books() {
                 </div>
                 {user?.role === "ADMIN" && (
                     <button
-                        onClick={() => openModal()}
+                        onClick={() => openModal()} // Sayfaya gitmek yerine MODAL AÇAR
                         className="px-8 py-4 rounded-[1.5rem] bg-blue-600 text-white font-black uppercase tracking-widest text-xs hover:bg-blue-700 shadow-xl transition-all active:scale-95"
                     >
                         + Yeni Kitap Ekle
@@ -214,7 +200,7 @@ function Books() {
                             {user?.role === "ADMIN" && (
                                 <>
                                     <button onClick={() => openModal(book.id)} className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 py-4 rounded-2xl flex items-center justify-center transition-all">✏️</button>
-                                    <button onClick={() => handleDelete(book.id)} className="flex-1 bg-red-50 hover:bg-red-500 hover:text-white text-red-500 py-4 rounded-2xl flex items-center justify-center transition-all">🗑️</button>
+                                    <button onClick={() => deleteBook(book.id)} className="flex-1 bg-red-50 hover:bg-red-500 hover:text-white text-red-500 py-4 rounded-2xl flex items-center justify-center transition-all">🗑️</button>
                                 </>
                             )}
                         </div>
@@ -222,7 +208,7 @@ function Books() {
                 ))}
             </div>
 
-            {/* MODAL */}
+            {/* --- MODAL (SORUNU ÇÖZEN KISIM) --- */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-md bg-slate-900/60">
                     <div className="relative w-full max-w-lg bg-white rounded-[3rem] p-12 shadow-2xl animate-in zoom-in duration-300">
