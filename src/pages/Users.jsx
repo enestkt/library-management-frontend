@@ -1,23 +1,29 @@
 import { useEffect, useState } from "react";
-import { getAllUsers, deleteUser } from "../api/api";
+import { getAllUsers, deleteUser, register } from "../api/api"; // register fonksiyonunu ekledik
 import toast from "react-hot-toast";
 
 function Users() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Giriş yapan kullanıcının rolünü kontrol etmek için
+    // Yeni kullanıcı formu için state
+    const [formData, setFormData] = useState({
+        username: "",
+        password: "",
+        email: "",
+        name: ""
+    });
 
     let currentUser = null;
     try {
         const rawUser = localStorage.getItem("user");
-        currentUser  = rawUser && rawUser !== "undefined"
+        currentUser = rawUser && rawUser !== "undefined"
             ? JSON.parse(rawUser)
             : null;
     } catch (e) {
         currentUser = null;
     }
-
 
     useEffect(() => {
         loadUsers();
@@ -36,9 +42,7 @@ function Users() {
         }
     };
 
-    // --- SİLME İŞLEMİ (EKLENEN KISIM) ---
     const handleDelete = async (id) => {
-        // Admin'in kendini silmesini engellemek için küçük bir güvenlik kontrolü
         if (id === currentUser.userId) {
             toast.error("Kendi hesabınızı silemezsiniz!");
             return;
@@ -48,13 +52,27 @@ function Users() {
             try {
                 await deleteUser(id);
                 toast.success("Kullanıcı başarıyla silindi.");
-                // Listeyi sayfayı yenilemeden güncelle
                 setUsers(users.filter(user => user.id !== id));
             } catch (err) {
-                // Eğer kullanıcının iade etmediği kitap varsa backend hata dönecektir
                 const msg = err.response?.data?.message || "Kullanıcı silinemedi. (Aktif ödünç işlemi olabilir)";
                 toast.error(msg);
             }
+        }
+    };
+
+    const handleAddUser = async (e) => {
+        e.preventDefault();
+        try {
+            // Backend register endpointine istek atıyoruz
+            // Bu endpoint varsayılan olarak USER rolü atar.
+            await register(formData);
+            toast.success("Yeni üye başarıyla kaydedildi.");
+            setIsModalOpen(false);
+            setFormData({ username: "", password: "", email: "", name: "" }); // Formu temizle
+            loadUsers(); // Listeyi yenile
+        } catch (err) {
+            const errorMsg = err.response?.data?.message || "Kayıt sırasında bir hata oluştu.";
+            toast.error(errorMsg);
         }
     };
 
@@ -69,11 +87,96 @@ function Users() {
 
     return (
         <div className="max-w-7xl mx-auto space-y-8 p-4 animate-in fade-in duration-500">
-            {/* BAŞLIK */}
-            <div>
-                <h1 className="text-4xl font-black text-slate-900 tracking-tight">Üye Yönetimi</h1>
-                <p className="text-slate-500 mt-2 font-medium">Sistemdeki tüm kayıtlı kütüphane üyelerini yönetin.</p>
+            {/* BAŞLIK VE EKLEME BUTONU */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">Üye Yönetimi</h1>
+                    <p className="text-slate-500 mt-2 font-medium">Sistemdeki tüm kayıtlı kütüphane üyelerini yönetin.</p>
+                </div>
+                {currentUser?.role === "ADMIN" && (
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="bg-blue-600 text-white px-8 py-4 rounded-[1.5rem] font-black uppercase tracking-widest text-xs hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
+                    >
+                        + Yeni Üye Kaydet
+                    </button>
+                )}
             </div>
+
+            {/* ÜYE EKLEME MODAL (POPUP) */}
+            {isModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 border border-slate-100 animate-in zoom-in-95 duration-300">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-black text-slate-900">Yeni Üye Ekle</h2>
+                            <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors text-2xl">×</button>
+                        </div>
+
+                        <form onSubmit={handleAddUser} className="space-y-4">
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Ad Soyad</label>
+                                <input
+                                    required
+                                    type="text"
+                                    className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                                    placeholder="Örn: Ahmet Yılmaz"
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Kullanıcı Adı</label>
+                                <input
+                                    required
+                                    type="text"
+                                    className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                                    placeholder="kullanici_adi"
+                                    value={formData.username}
+                                    onChange={(e) => setFormData({...formData, username: e.target.value})}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">E-posta</label>
+                                <input
+                                    required
+                                    type="email"
+                                    className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                                    placeholder="ahmet@mail.com"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Şifre</label>
+                                <input
+                                    required
+                                    type="password"
+                                    className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                                    placeholder="••••••••"
+                                    value={formData.password}
+                                    onChange={(e) => setFormData({...formData, password: e.target.value})}
+                                />
+                            </div>
+
+                            <div className="pt-4 flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsModalOpen(false)}
+                                    className="flex-1 px-5 py-4 border border-slate-100 rounded-2xl font-black uppercase tracking-widest text-[10px] text-slate-500 hover:bg-slate-50 transition-all"
+                                >
+                                    Vazgeç
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="flex-1 px-5 py-4 bg-blue-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
+                                >
+                                    Kaydet
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
 
             {/* KULLANICI TABLOSU */}
             <div className="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
@@ -119,7 +222,6 @@ function Users() {
                                         {user.createdAt ? new Date(user.createdAt).toLocaleDateString('tr-TR') : "Belirtilmedi"}
                                     </td>
                                     <td className="px-10 py-7 text-right">
-                                        {/* Sadece ADMIN'ler silme işlemi yapabilir ve kendini silemez */}
                                         {currentUser?.role === "ADMIN" && user.id !== currentUser.userId && (
                                             <button
                                                 onClick={() => handleDelete(user.id)}
