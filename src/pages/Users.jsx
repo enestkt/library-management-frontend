@@ -42,6 +42,24 @@ function Users() {
         }
     };
 
+    // E-posta değiştikçe kullanıcı adını otomatik dolduran fonksiyon
+    const handleEmailChange = (e) => {
+        const emailValue = e.target.value;
+        let newUsername = formData.username;
+
+        // Eğer e-posta bir @ işareti içeriyorsa, öncesindeki kısmı kullanıcı adı yap
+        if (emailValue.includes("@")) {
+            // Sadece harf ve rakamları alacak şekilde temizleme yapıyoruz (opsiyonel ama daha güvenli)
+            newUsername = emailValue.split("@")[0].toLowerCase().replace(/[^a-z0-9]/g, "");
+        }
+
+        setFormData({
+            ...formData,
+            email: emailValue,
+            username: newUsername
+        });
+    };
+
     const handleDelete = async (id) => {
         if (id === currentUser.userId) {
             toast.error("Kendi hesabınızı silemezsiniz!");
@@ -125,17 +143,6 @@ function Users() {
                                 />
                             </div>
                             <div>
-                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Kullanıcı Adı</label>
-                                <input
-                                    required
-                                    type="text"
-                                    className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
-                                    placeholder="kullanici_adi"
-                                    value={formData.username}
-                                    onChange={(e) => setFormData({...formData, username: e.target.value})}
-                                />
-                            </div>
-                            <div>
                                 <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">E-posta</label>
                                 <input
                                     required
@@ -143,7 +150,18 @@ function Users() {
                                     className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                                     placeholder="ahmet@mail.com"
                                     value={formData.email}
-                                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                    onChange={handleEmailChange} // E-posta değiştikçe handleEmailChange çalışır
+                                />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">Kullanıcı Adı (Otomatik Oluşur)</label>
+                                <input
+                                    required
+                                    type="text"
+                                    className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                                    placeholder="kullanici_adi"
+                                    value={formData.username}
+                                    onChange={(e) => setFormData({...formData, username: e.target.value})}
                                 />
                             </div>
                             <div>
@@ -222,6 +240,7 @@ function Users() {
                                         {user.createdAt ? new Date(user.createdAt).toLocaleDateString('tr-TR') : "Belirtilmedi"}
                                     </td>
                                     <td className="px-10 py-7 text-right">
+                                        {/* Sadece ADMIN'ler silme işlemi yapabilir ve kendini silemez */}
                                         {currentUser?.role === "ADMIN" && user.id !== currentUser.userId && (
                                             <button
                                                 onClick={() => handleDelete(user.id)}
