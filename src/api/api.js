@@ -32,22 +32,24 @@ api.interceptors.response.use(
 
 /* AUTH İŞLEMLERİ */
 export const loginRequest = (email, password) => api.post("/auth/login", { email, password });
-export const registerRequest = (name, email, password) => api.post("/auth/register", { name, email, password });
+
+/**
+ * ⭐ DÜZELTİLEN KISIM:
+ * Fonksiyon adını 'register' yaptık ki Users.jsx içindeki import hatası çözülsün.
+ * Parametre olarak 'userData' alıyoruz, böylece formdaki 'username' bilgisi de backend'e iletilir.
+ */
+export const register = (userData) => api.post("/auth/register", userData);
 
 /* KULLANICI İŞLEMLERİ */
 export const getAllUsers = () => api.get("/users");
 export const deleteUser = (id) => api.delete(`/users/${id}`);
 
 /* KİTAP İŞLEMLERİ */
-// Loans.jsx içindeki kullanıma göre getAllBooks ismini sabitledik
 export const getAllBooks = () => api.get("/books");
 export const getBookById = (id) => api.get(`/books/${id}`);
 export const deleteBook = (id) => api.delete(`/books/${id}`);
 
 /* ÖDÜNÇ İŞLEMLERİ (LOAN) */
-
-// ⭐ DÜZELTİLEN KRİTİK KISIM:
-// Backend @RequestBody LoanRequestDto beklediği için veriyi JSON objesi olarak gönderiyoruz.
 export const borrowBook = (bookId, userId) => {
     return api.post("/loans/borrow", {
         bookId: Number(bookId),
@@ -55,9 +57,7 @@ export const borrowBook = (bookId, userId) => {
     });
 };
 
-// İade işlemi backend'de @PathVariable olduğu için URL içinden gönderilmeye devam ediyor.
 export const returnBook = (loanId) => api.post(`/loans/return/${loanId}`);
-
 export const getAllLoans = () => api.get("/loans");
 export const getUserLoans = (userId) => api.get(`/loans/user/${userId}`);
 
