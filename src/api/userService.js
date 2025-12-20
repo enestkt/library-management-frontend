@@ -10,6 +10,7 @@ export const deleteUser = (id) => {
     return api.delete(`/users/${id}`);
 };
 // Yeni üye kaydı (Admin panelinden üye eklemek için)
+
 export const register = (userData) => {
     return api.post("/auth/register", userData);
 };
