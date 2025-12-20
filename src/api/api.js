@@ -39,6 +39,7 @@ export const loginRequest = (email, password) => api.post("/auth/login", { email
  * Parametre olarak 'userData' alıyoruz, böylece formdaki 'username' bilgisi de backend'e iletilir.
  */
 export const register = (userData) => api.post("/auth/register", userData);
+export const registerRequest = (userData) => api.post("/auth/register", userData);
 
 /* KULLANICI İŞLEMLERİ */
 export const getAllUsers = () => api.get("/users");
